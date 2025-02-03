@@ -365,6 +365,7 @@ function processData(data, performance) {
   let messageCount = 0;
   let likepageSpend = 0;
   let trafficSpend = 0;
+  let linkClickCount = 0;
   let likepageCount = 0;
   let leadSpend = 0;
   let leadCount = 0;
@@ -391,62 +392,78 @@ function processData(data, performance) {
           item.actions,
           "onsite_conversion.messaging_conversation_started_7d"
         ) || 0;
+      const goal = item.optimization_goal;
+      let goalType = Object.entries(goalMapping).find(([_, goals]) =>
+        goals.includes(goal)
+      )?.[0];
       if (performance === "true") {
-        if (item.optimization_goal == "REACH") {
-          awarenessSpend += parseFloat(item.spend) || 0;
-          awarenessReach += parseInt(item.reach) || 0;
-        }
-        if (item.optimization_goal == "PROFILE_VISIT") {
-          trafficSpend += parseFloat(item.spend) || 0;
-        }
-        if (
-          item.optimization_goal == "POST_ENGAGEMENT" ||
-          item.optimization_goal == "THRUPLAY"
-        ) {
-          engagementSpend += parseFloat(item.spend) || 0;
-          engagementReaction +=
-            getValueFromActions(item.actions, "post_reaction") || 0;
-        }
-        if (item.optimization_goal == "REPLIES") {
-          messageSpend += spend;
-          messageCount +=
-            getValueFromActions(
-              item.actions,
-              "onsite_conversion.messaging_conversation_started_7d"
-            ) || 0;
-        }
-        if (item.optimization_goal == "PAGE_LIKES") {
-          likepageSpend += spend;
-          likepageCount += getValueFromActions(item.actions, "like") || 0;
-        }
-        if (
-          item.optimization_goal == "LEAD_GENERATION" ||
-          item.optimization_goal == "QUALITY_LEAD"
-        ) {
-          leadSpend += spend;
-          leadCount += getValueFromActions(item.actions, "lead") || 0;
+        const spend = parseFloat(item.spend) || 0;
+        switch (goalType) {
+          case "Awareness":
+            awarenessSpend += spend;
+            awarenessReach += parseInt(item.reach) || 0;
+            break;
+
+          case "Traffic":
+            trafficSpend += spend;
+            linkClickCount +=
+              getValueFromActions(item.actions, "link_click") || 0;
+            break;
+
+          case "Engagement":
+            engagementSpend += spend;
+            engagementReaction +=
+              getValueFromActions(item.actions, "post_reaction") || 0;
+            break;
+
+          case "Message":
+            messageSpend += spend;
+            messageCount +=
+              getValueFromActions(
+                item.actions,
+                "onsite_conversion.messaging_conversation_started_7d"
+              ) || 0;
+            break;
+
+          case "Pagelike":
+            likepageSpend += spend;
+            likepageCount += getValueFromActions(item.actions, "like") || 0;
+            break;
+
+          case "Lead Form":
+            leadSpend += spend;
+            leadCount += getValueFromActions(item.actions, "lead") || 0;
+            break;
         }
       }
+
       // Xác định resultType dựa trên campaign name
       let resultType = 0;
-      if (item.optimization_goal == "POST_ENGAGEMENT")
-        resultType = parseInt(postReaction);
-      if (item.optimization_goal == "REACH") resultType = parseInt(reach);
-      if (item.optimization_goal == "THRUPLAY")
-        resultType = parseInt(videoView);
-      if (item.optimization_goal == "PROFILE_VISIT")
-        resultType = parseInt(pageEngagement);
-      if (
-        item.optimization_goal == "LEAD_GENERATION" ||
-        item.optimization_goal == "QUALITY_LEAD"
-      )
-        resultType = parseInt(lead);
-      if (item.optimization_goal == "REPLIES")
-        resultType = parseInt(messengerStart);
-      if (item.optimization_goal == "PAGE_LIKES")
-        resultType = parseInt(follows);
-      if (item.optimization_goal == "LINK_CLICKS")
-        resultType = parseInt(linkClick);
+      switch (goalType) {
+        case "Engagement":
+          resultType = parseInt(postReaction);
+          break;
+
+        case "Awareness":
+          resultType = parseInt(reach);
+          break;
+
+        case "Traffic":
+          resultType = parseInt(linkClick);
+          break;
+
+        case "Message":
+          resultType = parseInt(messengerStart);
+          break;
+
+        case "Pagelike":
+          resultType = parseInt(follows);
+          break;
+
+        case "Lead Form":
+          resultType = parseInt(lead);
+          break;
+      }
 
       // Tính CPR
       let costPerResult = resultType > 0 ? Math.round(spend / resultType) : "-";
@@ -601,49 +618,13 @@ function filterData(campaign_name = "", adset_name = "", query_type) {
       return campaignMatch && adsetMatch;
     });
   } else {
-    switch (query_type) {
-      case "Lead Form":
-        filteredData = allData.filter((item) => {
-          return (
-            item.optimization_goal === "LEAD_GENERATION" ||
-            item.optimization_goal === "QUALITY_LEAD"
-          );
-        });
-        break;
-      case "Awareness":
-        filteredData = allData.filter((item) => {
-          return item.optimization_goal === "REACH";
-        });
-        break;
-      case "Engagement":
-        filteredData = allData.filter((item) => {
-          return (
-            item.optimization_goal === "POST_ENGAGEMENT" ||
-            item.optimization_goal === "THRUPLAY"
-          );
-        });
-        break;
-      case "Message":
-        filteredData = allData.filter((item) => {
-          return item.optimization_goal === "REPLIES";
-        });
-        break;
-      case "Traffic":
-        filteredData = allData.filter((item) => {
-          return (
-            item.optimization_goal === "OFFSITE_CONVERSIONS" ||
-            item.optimization_goal === "LINK_CLICKS" ||
-            item.optimization_goal === "PROFILE_VISIT"
-          );
-        });
-        break;
-      case "Likepage":
-        filteredData = allData.filter((item) => {
-          return item.optimization_goal === "PAGE_LIKES";
-        });
-        break;
-      default:
-        console.log("Loại chiến dịch không hợp lệ.");
+    const goalList = goalMapping[query_type];
+    if (goalList) {
+      filteredData = allData.filter((item) =>
+        goalList.includes(item.optimization_goal)
+      );
+    } else {
+      console.log("Loại chiến dịch không hợp lệ.");
     }
   }
   console.log("Filtered Data:", filteredData); // Debug xem lọc đúng không
@@ -676,17 +657,6 @@ function calculateBrandSpending(allData, brandLabels) {
   // Khởi tạo mảng tổng spend cho từng brand
   const brandTotals = brandLabels.map(() => 0);
 
-  // Định nghĩa mapping giữa brand và optimization_goal
-  const goalMapping = {
-    "Lead Form": ["LEAD_GENERATION", "QUALITY_LEAD"],
-    Awareness: ["REACH"],
-    Engagement: ["POST_ENGAGEMENT", "THRUPLAY"],
-    Message: ["REPLIES"],
-    Traffic: ["OFFSITE_CONVERSIONS", "LINK_CLICKS", "PROFILE_VISIT"],
-    Likepage: ["PAGE_LIKES"],
-  };
-
-  // Lặp qua tất cả các adset
   allData.forEach((adset) => {
     const campaignGoal = adset.optimization_goal;
     const spend = parseFloat(adset.spend || 0); // Chi tiêu của adset
@@ -2466,49 +2436,14 @@ const dom_title_report_list = document.querySelector(
 function filterCampaignQuery() {
   let query = localStorage.getItem("query");
   let filteredCampaigns = [];
-  switch (query) {
-    case "Lead Form":
-      filteredCampaigns = allData.filter((item) => {
-        return (
-          item.optimization_goal === "LEAD_GENERATION" ||
-          item.optimization_goal === "QUALITY_LEAD"
-        );
-      });
-      break;
-    case "Awareness":
-      filteredCampaigns = allData.filter((item) => {
-        return item.optimization_goal === "REACH";
-      });
-      break;
-    case "Engagement":
-      filteredCampaigns = allData.filter((item) => {
-        return (
-          item.optimization_goal === "POST_ENGAGEMENT" ||
-          item.optimization_goal === "THRUPLAY"
-        );
-      });
-      break;
-    case "Message":
-      filteredCampaigns = allData.filter((item) => {
-        return item.optimization_goal === "REPLIES";
-      });
-      break;
-    case "Traffic":
-      filteredCampaigns = allData.filter((item) => {
-        return (
-          item.optimization_goal === "OFFSITE_CONVERSIONS" ||
-          item.optimization_goal === "LINK_CLICKS" ||
-          item.optimization_goal === "PROFILE_VISIT"
-        );
-      });
-      break;
-    case "Likepage":
-      filteredCampaigns = allData.filter((item) => {
-        return item.optimization_goal === "PAGE_LIKES";
-      });
-      break;
-    default:
-      console.log("Loại chiến dịch không hợp lệ.");
+  const goalList = goalMapping[query];
+
+  if (goalList) {
+    filteredCampaigns = allData.filter((item) =>
+      goalList.includes(item.optimization_goal)
+    );
+  } else {
+    console.log("Loại chiến dịch không hợp lệ.");
   }
 
   const uniqueCampaignNames = [
