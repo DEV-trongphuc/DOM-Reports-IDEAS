@@ -1,19 +1,3 @@
-const quick_filter = [
-  "Lead Form",
-  "Awareness",
-  "Engagement",
-  "Message",
-  "Pagelike",
-  "Traffic",
-];
-const goalMapping = {
-  "Lead Form": ["LEAD_GENERATION", "QUALITY_LEAD"],
-  Awareness: ["REACH"],
-  Engagement: ["POST_ENGAGEMENT", "THRUPLAY"],
-  Message: ["REPLIES"],
-  Pagelike: ["OFFSITE_CONVERSIONS", "LINK_CLICKS", "PROFILE_VISIT"],
-  Traffic: ["PAGE_LIKES"],
-};
 const brandData = {
   labels: quick_filter,
   datasets: [
@@ -37,9 +21,6 @@ let viewCampaigns = "";
 let viewAdsets = "";
 let quickview_adset = false;
 let currentChart = null; // Biến lưu trữ đối tượng biểu đồ hiện tại
-const accessToken =
-  "EAAQwS9m6tIABO8ZCZCvO4TtPBXcbilAYn3nwZCZB739B8GtMfy2V2uJmgjHMtvsdKS6XMl7YiBuXqg3BxTdh37H7Vv5qYcsZA7IqVYMLqHX3FhQdxD8fSguISa0sDg1INzOfVtUCt8OoNqh0j6PXvu50rZCgMerGZAJ7NAYgLYuTsPw8NvdOEdF5kRX9C0ctu1ka7CS6VcbbXosWnMM"; // Token của bạn
-const adAccountId = "1852318231510577"; // ID tài khoản quảng cáo
 
 const apiUrl = `https://graph.facebook.com/v16.0/act_${adAccountId}/insights?level=adset&fields=campaign_name,adset_name,spend,impressions,reach,actions,optimization_goal&date_preset=this%5fmonth&filtering=[{"field":"spend","operator":"GREATER_THAN","value":0}]&access_token=${accessToken}&limit=1000`;
 const apiDaily = `https://graph.facebook.com/v16.0/act_${adAccountId}/insights?fields=spend,reach,actions,date_start&time_increment=1&date_preset=this%5fmonth&access_token=${accessToken}&limit=1000`;
