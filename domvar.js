@@ -11,9 +11,14 @@ const quick_filter = [
 ];
 const goalMapping = {
   "Lead Form": ["LEAD_GENERATION", "QUALITY_LEAD"],
-  Awareness: ["REACH"],
-  Engagement: ["POST_ENGAGEMENT", "THRUPLAY"],
+  Awareness: ["REACH", "AD_RECALL_LIFT", "IMPRESSIONS"],
+  Engagement: ["POST_ENGAGEMENT", "THRUPLAY", "EVENT_RESPONSES"],
   Message: ["REPLIES"],
-  Pagelike: ["OFFSITE_CONVERSIONS", "LINK_CLICKS", "PROFILE_VISIT"],
-  Traffic: ["PAGE_LIKES"],
+  Traffic: [
+    "OFFSITE_CONVERSIONS",
+    "LINK_CLICKS",
+    "PROFILE_VISIT",
+    "LADING_PAGE_VIEWS",
+  ],
+  Pagelike: ["PAGE_LIKES"],
 };
