@@ -274,7 +274,7 @@ body::-webkit-scrollbar-thumb:hover {
 }
 #dom_contentarea.zoom > .dom_header {
   left: 2rem;
-  width: calc(100vw - 4rem);
+  width: calc(100vw - 5.5rem);
 }
 .dom_header_date .dom_choose_day {
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
