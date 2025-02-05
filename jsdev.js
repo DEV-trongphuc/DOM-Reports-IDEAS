@@ -33,9 +33,40 @@ const dom_reaction_unit = document.getElementById("dom_reaction_unit");
 const dom_mess_unit = document.getElementById("dom_mess_unit");
 const dom_like_unit = document.getElementById("dom_like_unit");
 const percentChart = document.querySelector(".percentChart");
-
 const dom_main_menu_a = document.querySelectorAll(".dom_main_menu li a");
 const dom_contentarea = document.querySelector("#dom_contentarea");
+const dom_event_ul = document.querySelector(".dom_event_ul > ul");
+const dom_not_data = document.querySelector(".dom_not_data");
+const dom_choose_day = document.querySelector(".dom_choose_day");
+const dom_choosed = document.querySelector(".dom_choosed");
+const dom_choosed_day = document.querySelector(".dom_choosed_day");
+const itemDate = document.querySelectorAll(".dom_choose_day li"); // Select all li items in the dom_choose_day list
+const radio_choose_date = document.querySelectorAll(
+  ".dom_choose_day li .radio_box"
+);
+const viewAdsetUl = document.querySelector(".view_adset ul");
+const viewAdsetTitle = document.querySelector(".dom_view_campaign.adset");
+const viewAdsetUlList = document.querySelector(
+  ".view_adset .dom_title_report_list > div"
+);
+const dom_quick_filter = document.querySelector(".dom_quick_filter");
+const dom_table_data = document.querySelector(".dom_table_data");
+
+let dailyChartInstance; // Declare globally
+const view_selected_campaign = document.querySelector(
+  ".view_selected.campaign"
+);
+const view_selected_account = document.querySelector(".view_selected.account");
+const dom_select_view = document.querySelector(".dom_select_view.campaign");
+const dom_select_li = document.querySelectorAll(
+  ".dom_select_view.campaign ul li"
+);
+const dom_select_view_acc = document.querySelector(".dom_select_view.account");
+const dom_select_li_acc = document.querySelectorAll(
+  ".dom_select_view.account ul li"
+);
+let allDatasets = []; // Store datasets globally
+let allDatasets2 = []; // Store datasets globally
 // Hàm để vẽ lại biểu đồ
 let impressionDoughnutChart;
 
@@ -44,7 +75,7 @@ function drawChart(data) {
 
   // Nếu biểu đồ hiện tại đã tồn tại, hủy bỏ nó
   if (currentChart !== null) {
-    currentChart.destroy(); // Hủy biểu đồ cũ trước khi vẽ lại
+    currentChart.destroy();
   }
 
   // Tạo biểu đồ mới
@@ -58,12 +89,28 @@ function drawChart(data) {
         legend: {
           display: false,
         },
+        tooltip: {
+          enabled: true, // Hiển thị tooltip khi hover
+        },
+        datalabels: {
+          // Thêm plugin để hiển thị giá trị trên cột
+          anchor: "end", // Vị trí gắn (có thể là 'center', 'end', 'start')
+          align: "top", // Căn chỉnh vị trí (trên đầu cột)
+          color: "#7c7c7c", // Màu chữ
+          font: {
+            size: 11, // Kích thước chữ
+            weight: "bold", // Đậm chữ để dễ nhìn hơn
+          },
+          formatter: function (value) {
+            return formatCurrency(value); // Hiển thị đúng giá trị của cột
+          },
+        },
       },
       scales: {
         x: {
           ticks: {
             font: {
-              size: 10, // Giảm kích thước chữ trục X (mặc định khoảng 12-14)
+              size: 10,
             },
           },
         },
@@ -71,22 +118,25 @@ function drawChart(data) {
           beginAtZero: true,
           ticks: {
             font: {
-              size: 9, // Giảm kích thước chữ trục Y
+              size: 9,
             },
+          },
+          afterDataLimits: (scale) => {
+            scale.max *= 1.1; // Tăng 10% so với max hiện tại
           },
         },
       },
     },
+    plugins: [ChartDataLabels], // Kích hoạt plugin datalabels
   });
 }
 
 // ___________________
-
+let firstload = true;
 async function fetchData(api) {
+  document.querySelector(".loading").classList.add("active");
   const query = localStorage.getItem("query");
   const iview = localStorage.getItem("iview");
-  document.querySelector(".loading").classList.add("active");
-  console.log("fetchData");
   if (!query) {
     localStorage.setItem("query", quick_filter[0]);
   }
@@ -109,8 +159,8 @@ async function fetchData(api) {
 
       // Kiểm tra lỗi từ API
       if (data.error) {
+        document.querySelector(".loading").classList.remove("active");
         console.error("Error from API:", data.error.message);
-
         return;
       }
 
@@ -124,7 +174,6 @@ async function fetchData(api) {
     }
 
     // Render dữ liệu vào giao diện
-    document.querySelector(".loading").classList.remove("active");
     if (typeof renderTopCampaigns === "function") {
       renderTopCampaigns(allData);
     }
@@ -143,88 +192,116 @@ async function fetchData(api) {
     document.getElementById("total_follows").textContent = formatNumber(
       Math.round(totals.follows)
     );
+    document.getElementById("total_clicks").textContent = formatNumber(
+      Math.round(totals.clicks)
+    );
+    document.getElementById("total_impressions").textContent = formatNumber(
+      Math.round(totals.impressions)
+    );
+    document.getElementById("total_message").textContent = formatNumber(
+      Math.round(totals.message)
+    );
+    document.getElementById("total_love").textContent = formatNumber(
+      Math.round(totals.reaction)
+    );
 
     const totalSpends = calculateBrandSpending(allData, brandData.labels);
     brandData.datasets[0].data = totalSpends;
     drawChart(brandData); // Thay vì dùng new Chart, giờ gọi drawChart
     // processData(allData);
+    renderReportPerformance();
 
     const quickID = localStorage.getItem("quickID");
-    if (quickID && query) {
-      renderReportPerformance();
-    } else {
-      if (!iview) {
-        filterData("");
-      }
+    if (firstload && (!quickID || !query) && !iview) {
+      filterData("");
     }
   } catch (error) {
-    document.querySelector(".loading").classList.remove("active");
     console.error("Fetch error:", error);
   }
+  firstload = false;
+  document.querySelector(".loading").classList.remove("active");
 }
-const dom_event_ul = document.querySelector(".dom_event_ul > ul");
+function calculateMetrics(rows) {
+  const metrics = {
+    spend: 0,
+    reach: 0,
+    result: 0,
+    impressions: 0,
+    engagement: 0,
+    reactions: 0,
+    follows: 0,
+    comments: 0,
+    video: 0,
+    photo: 0,
+    lead: 0,
+    linkClicks: 0,
+    messengerStart: 0,
+  };
+
+  const fields = [
+    { key: "spend", type: "float" },
+    { key: "reach", type: "int" },
+    { key: "result", type: "int" },
+    { key: "impressions", type: "int" },
+    { key: "engagement", type: "int" },
+    { key: "postReaction", type: "int", mapTo: "reactions" },
+    { key: "follows", type: "int" },
+    { key: "comments", type: "int" },
+    { key: "video", type: "int" },
+    { key: "photo", type: "int" },
+    { key: "lead", type: "int" },
+    { key: "linkClick", type: "int", mapTo: "linkClicks" },
+    { key: "messengerStart", type: "int" },
+  ];
+
+  rows.forEach((row) => {
+    fields.forEach(({ key, type, mapTo }) => {
+      const element = row.querySelector(`.${key}`);
+      const value = element
+        ? type === "float"
+          ? parseFloat(element.dataset.value)
+          : parseInt(element.dataset.value)
+        : 0;
+      metrics[mapTo || key] += value || 0;
+    });
+  });
+
+  return metrics;
+}
+
 function processData(data, performance) {
   let render = ``;
   const dom_detail_tbody = document.querySelector(".dom_detail_tbody ");
   // Hàm tính tổng và cập nhật tfoot
   function updateTotals(rows, selectedCount = 0) {
-    let spend = 0;
-    let reach = 0;
-    let impressions = 0;
-    let engagement = 0;
-    let reactions = 0;
-    let follows = 0;
-    let lead = 0;
-    let result = 0;
-    let comments = 0;
-    let linkClicks = 0;
-    let messengerStart = 0;
-    let video = 0;
-    let photo = 0;
-
-    rows.forEach((row) => {
-      spend += parseFloat(row.querySelector(".spend").dataset.value) || 0;
-      reach += parseInt(row.querySelector(".reach").dataset.value) || 0;
-      result += parseInt(row.querySelector(".result").dataset.value) || 0;
-      impressions +=
-        parseInt(row.querySelector(".impressions").dataset.value) || 0;
-      engagement +=
-        parseInt(row.querySelector(".engagement").dataset.value) || 0;
-      reactions +=
-        parseInt(row.querySelector(".postReaction").dataset.value) || 0;
-      follows += parseInt(row.querySelector(".follows").dataset.value) || 0;
-      comments += parseInt(row.querySelector(".comments").dataset.value) || 0;
-      video += parseInt(row.querySelector(".video").dataset.value) || 0;
-      photo += parseInt(row.querySelector(".photo").dataset.value) || 0;
-      lead += parseInt(row.querySelector(".lead").dataset.value) || 0;
-      linkClicks +=
-        parseInt(row.querySelector(".linkClick").dataset.value) || 0;
-      messengerStart +=
-        parseInt(row.querySelector(".messengerStart").dataset.value) || 0;
-    });
-    let renderEvents = [
-      { name: "Post Reaction", value: reactions },
-      { name: "Messenger Start", value: messengerStart },
-      { name: "Lead Complete", value: lead },
-      { name: "Comments on Ads", value: comments },
-      { name: "Video view", value: video },
-      { name: "Photo view", value: photo },
-      { name: "Post Engagement", value: engagement },
-      { name: "Follows/Likepage", value: follows },
-      { name: "Link Click", value: linkClicks },
+    let metrics = calculateMetrics(rows);
+    const renderEvents = [
+      { name: "Post Reaction", value: metrics.reactions },
+      { name: "Messenger Start", value: metrics.messengerStart },
+      { name: "Lead Complete", value: metrics.lead },
+      { name: "Comments on Ads", value: metrics.comments },
+      { name: "Video view", value: metrics.video },
+      { name: "Photo view", value: metrics.photo },
+      { name: "Post Engagement", value: metrics.engagement },
+      { name: "Follows/Likepage", value: metrics.follows },
+      { name: "Link Click", value: metrics.linkClicks },
     ];
 
     // Sắp xếp theo `value` giảm dần
     renderEvents.sort((a, b) => b.value - a.value);
-    const maxValue = renderEvents[0].value;
+
+    // Xác định giá trị lớn nhất để tính % chiều rộng
+    const maxValue = renderEvents[0].value || 1; // Tránh chia cho 0
+
+    // Render danh sách
     dom_event_ul.innerHTML = renderEvents
       .map(
         ({ name, value }) => `
-      <li>
-        <p><span>${name}</span> <span>${formatNumber(value)}</span></p>
-        <p><span style=" width: ${(value * 100) / maxValue}%;"></span></p>
-      </li>
-    `
+          <li>
+            <p><span>${name}</span> <span>${formatNumber(value)}</span></p>
+            <p><span style="width: ${(value * 100) / maxValue}%;"></span></p>
+          </li>
+        `
       )
       .join("");
 
@@ -238,96 +315,79 @@ function processData(data, performance) {
         dom_contentarea.classList.add("viewQuickAdset");
         window.scrollTo({ top: 0, behavior: "smooth" });
         quickview_adset = true;
-        filterData(campaign, adset);
+        // filterData(campaign, adset);
         renderReportPerformance(campaign, adset);
       });
     });
 
     // Cập nhật tfoot
     const tfootContent = `
-        <tr>
-          <td class="dom_selected_total" colspan="4">
-            ${
-              selectedCount > 0
-                ? `TOTAL x${selectedCount} adsets`
-                : "TOTAL ALL ADSETS"
-            }
-          </td>
-          <td>${formatCurrency(spend)}</td>
-          <td>${formatNumber(reach)}</td>
-          <td>${formatNumber(impressions)}</td>
-          <td>${formatNumber(result)}</td>
-           <td>-</td>
-          <td>-</td>
+    <tr>
+      <td class="dom_selected_total" colspan="4">
+        ${
+          selectedCount > 0
+            ? `TOTAL x${selectedCount} adsets`
+            : "TOTAL ALL ADSETS"
+        }
+      </td>
+      <td>${formatCurrency(metrics.spend)}</td>
+      <td>${formatNumber(metrics.reach)}</td>
+      <td>${formatNumber(metrics.impressions)}</td>
+      <td>${formatNumber(metrics.result)}</td>
       <td>-</td>
-          <td>${formatNumber(follows)}</td>
-          <td>${formatNumber(reactions)}</td>
-          <td>${formatNumber(messengerStart)}</td>
-          <td>${formatNumber(lead)}</td>
-          <td>-</td>
-          <td>${formatNumber(engagement)}</td>
-          <td>${formatNumber(video)}</td>
-          <td>${formatNumber(photo)}</td>
-          <td>${formatNumber(comments)}</td>
-          <td>${formatNumber(linkClicks)}</td>
-        </tr>
-      `;
+      <td>-</td>
+      <td>-</td>
+      <td>${formatNumber(metrics.follows)}</td>
+      <td>${formatNumber(metrics.reactions)}</td>
+      <td>${formatNumber(metrics.messengerStart)}</td>
+      <td>${formatNumber(metrics.lead)}</td>
+      <td>-</td>
+      <td>${formatNumber(metrics.engagement)}</td>
+      <td>${formatNumber(metrics.video)}</td>
+      <td>${formatNumber(metrics.photo)}</td>
+      <td>${formatNumber(metrics.comments)}</td>
+      <td>${formatNumber(metrics.linkClicks)}</td>
+    </tr>
+  `;
     document.querySelector("tfoot").innerHTML = tfootContent;
+
+    // Update viewPerformance
     const viewPerformance = document.querySelector(
       "#dom_contentarea.viewPerformance"
     );
     if (viewPerformance) {
-      const total_spend_viewPerformance = document.getElementById(
-        "total_spend_viewPerformance"
-      );
-      const total_reaction_viewPerformance = document.getElementById(
-        "total_reaction_viewPerformance"
-      );
-      const total_engagement_viewPerformance = document.getElementById(
-        "total_engagement_viewPerformance"
-      );
-      const total_reach_viewPerformance = document.getElementById(
-        "total_reach_viewPerformance"
-      );
-      const total_messenger_viewPerformance = document.getElementById(
-        "total_messenger_viewPerformance"
-      );
-      const total_follows_viewPerformance = document.getElementById(
-        "total_follows_viewPerformance"
-      );
-      const total_comment_viewPerformance = document.getElementById(
-        "total_comment_viewPerformance"
-      );
-      const total_link_viewPerformance = document.getElementById(
-        "total_link_viewPerformance"
-      );
-      const total_cpm_viewPerformance = document.getElementById(
-        "total_cpm_viewPerformance"
-      );
-      const total_prr_viewPerformance = document.getElementById(
-        "total_prr_viewPerformance"
-      );
-      total_cpm_viewPerformance.innerText = formatCurrency(
-        ((spend * 1000) / impressions).toFixed(0)
-      );
-      total_prr_viewPerformance.innerText = `${((result * 100) / reach).toFixed(
-        2
-      )}%`;
-      total_spend_viewPerformance.innerText = formatCurrency(spend);
-      total_reach_viewPerformance.innerText = formatNumber(reach);
-      total_messenger_viewPerformance.innerText = formatNumber(messengerStart);
-      total_follows_viewPerformance.innerText = formatNumber(follows);
-      total_reaction_viewPerformance.innerText = formatNumber(lead);
-      total_engagement_viewPerformance.innerText = formatNumber(engagement);
-      total_comment_viewPerformance.innerText = formatNumber(comments);
-      total_link_viewPerformance.innerText = formatNumber(linkClicks);
+      const metricMap = {
+        total_spend_viewPerformance: formatCurrency(metrics.spend),
+        total_reach_viewPerformance: formatNumber(metrics.reach),
+        total_messenger_viewPerformance: formatNumber(metrics.messengerStart),
+        total_follows_viewPerformance: formatNumber(metrics.follows),
+        total_reaction_viewPerformance: formatNumber(metrics.lead),
+        total_engagement_viewPerformance: formatNumber(metrics.engagement),
+        total_comment_viewPerformance: formatNumber(metrics.comments),
+        total_link_viewPerformance: formatNumber(metrics.linkClicks),
+        total_cpm_viewPerformance: formatCurrency(
+          ((metrics.spend * 1000) / metrics.impressions).toFixed(0)
+        ),
+        total_prr_viewPerformance: `${(
+          (metrics.result * 100) /
+          metrics.reach
+        ).toFixed(2)}%`,
+      };
+
+      Object.entries(metricMap).forEach(([id, value]) => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = value;
+      });
+
+      // Update frequency labels
       const impressionEl = document.querySelector(
         ".dom_frequency_label_impression"
       );
       const reachEl = document.querySelector(".dom_frequency_label_reach");
-      updateDonut(impressions, reach);
-      impressionEl.innerText = formatNumber(impressions);
-      reachEl.innerText = formatNumber(reach);
+      updateDonut(metrics.impressions, metrics.reach);
+      if (impressionEl)
+        impressionEl.innerText = formatNumber(metrics.impressions);
+      if (reachEl) reachEl.innerText = formatNumber(metrics.reach);
     }
   }
 
@@ -344,7 +404,9 @@ function processData(data, performance) {
       }
 
       // Lấy tất cả các hàng được check
-      const checkedRows = Array.from(document.querySelectorAll("tr.checked"));
+      const checkedRows = Array.from(
+        document.querySelectorAll("tbody tr.checked")
+      );
 
       if (checkedRows.length > 0) {
         updateTotals(checkedRows, checkedRows.length); // Gửi số hàng được chọn
@@ -356,208 +418,233 @@ function processData(data, performance) {
     }
   });
 
-  // Render dữ liệu và thêm thuộc tính data-value cho các ô số liệu
-  let awarenessSpend = 0;
-  let awarenessReach = 0;
-  let engagementSpend = 0;
-  let engagementReaction = 0;
-  let messageSpend = 0;
-  let messageCount = 0;
-  let likepageSpend = 0;
-  let trafficSpend = 0;
-  let linkClickCount = 0;
-  let likepageCount = 0;
-  let leadSpend = 0;
-  let leadCount = 0;
+  // Xử lý sự kiện khi click vào #dom_select_all
+  document
+    .getElementById("dom_select_all")
+    .addEventListener("click", function () {
+      const checkboxes = document.querySelectorAll(
+        'tbody input[type="checkbox"]'
+      );
+      const isChecked = this.checked; // Trạng thái của nút "chọn tất cả"
 
-  data.forEach((item) => {
-    const spend = parseFloat(item.spend) || 0;
-    if (spend > 0) {
-      const reach = item.reach || 0;
-      const impressions = item.impressions || 0;
-      const postEngagement =
-        getValueFromActions(item.actions, "post_engagement") || 0;
-      const postReaction =
-        getValueFromActions(item.actions, "post_reaction") || 0;
-      const follows = getValueFromActions(item.actions, "like") || 0;
-      const lead = getValueFromActions(item.actions, "lead") || 0;
-      const comments = getValueFromActions(item.actions, "comment") || 0;
-      const linkClick = getValueFromActions(item.actions, "link_click") || 0;
-      const pageEngagement =
-        getValueFromActions(item.actions, "page_engagement") || 0;
-      const photoView = getValueFromActions(item.actions, "photo_view") || 0;
-      const videoView = getValueFromActions(item.actions, "video_view") || 0;
-      const messengerStart =
+      checkboxes.forEach((checkbox) => {
+        checkbox.checked = isChecked;
+        const row = checkbox.closest("tr");
+
+        if (isChecked) {
+          row.classList.add("checked");
+        } else {
+          row.classList.remove("checked");
+        }
+      });
+
+      // Cập nhật tổng khi chọn tất cả hoặc bỏ chọn
+      const checkedRows = isChecked
+        ? Array.from(document.querySelectorAll("tr.checked"))
+        : Array.from(document.querySelectorAll("tbody tr"));
+
+      updateTotals(checkedRows, isChecked ? checkedRows.length : undefined);
+    });
+
+  // Render dữ liệu và thêm thuộc tính data-value cho các ô số liệu
+  // Tạo các nhóm dữ liệu cho từng mục tiêu
+  const metrics = {
+    awareness: { totalSpend: 0, totalReach: 0 },
+    engagement: { totalSpend: 0, totalReaction: 0 },
+    message: { totalSpend: 0, totalMessageCount: 0 },
+    likepage: { totalSpend: 0, totalLikeCount: 0 },
+    traffic: { totalSpend: 0, totalLinkClick: 0 },
+    lead: { totalSpend: 0, totalLeadCount: 0 },
+  };
+
+  data.forEach((campaignItem) => {
+    const itemSpend = parseFloat(campaignItem.spend) || 0;
+    if (itemSpend > 0) {
+      const itemReach = campaignItem.reach * 1 || 0;
+      const itemImpressions = campaignItem.impressions * 1 || 0;
+
+      const actions = campaignItem.actions || [];
+      const engagementCount =
+        getValueFromActions(actions, "post_engagement") || 0;
+      const reactionCount = getValueFromActions(actions, "post_reaction") || 0;
+      const likeCount = getValueFromActions(actions, "like") || 0;
+      const leadCount = getValueFromActions(actions, "lead") || 0;
+      const commentCount = getValueFromActions(actions, "comment") || 0;
+      const linkClickCount = getValueFromActions(actions, "link_click") || 0;
+      const photoViewCount = getValueFromActions(actions, "photo_view") || 0;
+      const videoViewCount = getValueFromActions(actions, "video_view") || 0;
+      const messageStartCount =
         getValueFromActions(
-          item.actions,
+          actions,
           "onsite_conversion.messaging_conversation_started_7d"
         ) || 0;
-      const goal = item.optimization_goal;
-      let goalType = Object.entries(goalMapping).find(([_, goals]) =>
-        goals.includes(goal)
+
+      const optimizationGoal = campaignItem.optimization_goal;
+      const goalType = Object.entries(goalMapping).find(([_, goals]) =>
+        goals.includes(optimizationGoal)
       )?.[0];
+
+      // Phân loại theo mục tiêu
       if (performance === "true") {
-        const spend = parseFloat(item.spend) || 0;
         switch (goalType) {
           case "Awareness":
-            awarenessSpend += spend;
-            awarenessReach += parseInt(item.reach) || 0;
+            metrics.awareness.totalSpend += itemSpend;
+            metrics.awareness.totalReach += itemReach;
             break;
 
           case "Traffic":
-            trafficSpend += spend;
-            linkClickCount +=
-              getValueFromActions(item.actions, "link_click") || 0;
+            metrics.traffic.totalSpend += itemSpend;
+            metrics.traffic.totalLinkClick += linkClickCount;
             break;
 
           case "Engagement":
-            engagementSpend += spend;
-            engagementReaction +=
-              getValueFromActions(item.actions, "post_reaction") || 0;
+            metrics.engagement.totalSpend += itemSpend;
+            metrics.engagement.totalReaction += reactionCount;
             break;
 
           case "Message":
-            messageSpend += spend;
-            messageCount +=
-              getValueFromActions(
-                item.actions,
-                "onsite_conversion.messaging_conversation_started_7d"
-              ) || 0;
+            metrics.message.totalSpend += itemSpend;
+            metrics.message.totalMessageCount += messageStartCount;
             break;
 
           case "Pagelike":
-            likepageSpend += spend;
-            likepageCount += getValueFromActions(item.actions, "like") || 0;
+            metrics.likepage.totalSpend += itemSpend;
+            metrics.likepage.totalLikeCount += likeCount;
             break;
 
           case "Lead Form":
-            leadSpend += spend;
-            leadCount += getValueFromActions(item.actions, "lead") || 0;
+            metrics.lead.totalSpend += itemSpend;
+            metrics.lead.totalLeadCount += leadCount;
             break;
         }
       }
 
-      // Xác định resultType dựa trên campaign name
-      let resultType = 0;
-      switch (goalType) {
-        case "Engagement":
-          resultType = parseInt(postReaction);
-          break;
+      // Xác định kết quả chính dựa trên mục tiêu
+      const resultType =
+        {
+          Engagement: reactionCount,
+          Awareness: itemReach,
+          Traffic: linkClickCount,
+          Message: messageStartCount,
+          Pagelike: likeCount,
+          "Lead Form": leadCount,
+        }[goalType] || 0;
 
-        case "Awareness":
-          resultType = parseInt(reach);
-          break;
-
-        case "Traffic":
-          resultType = parseInt(linkClick);
-          break;
-
-        case "Message":
-          resultType = parseInt(messengerStart);
-          break;
-
-        case "Pagelike":
-          resultType = parseInt(follows);
-          break;
-
-        case "Lead Form":
-          resultType = parseInt(lead);
-          break;
-      }
-
-      // Tính CPR
-      let costPerResult = resultType > 0 ? Math.round(spend / resultType) : "-";
-      if (item.campaign_name.toLowerCase().includes("awareness"))
-        costPerResult = resultType > 0 ? (spend / resultType).toFixed(1) : "-";
-      // Tính CPM
+      const costPerResult =
+        resultType > 0 ? Math.round(itemSpend / resultType) : "-";
       const cpm =
-        impressions > 0 ? Math.round((spend / impressions) * 1000) : 0;
-      const frequency = (impressions / reach).toFixed(2);
-      // Format tiền cho costPerResult và CPM
-      const formattedCostPerResult = formatCurrency(costPerResult);
-      const formattedCpm = formatCurrency(cpm);
-      const formatpostEngagement = formatNumber(postEngagement);
+        itemImpressions > 0
+          ? Math.round((itemSpend / itemImpressions) * 1000)
+          : 0;
+      const frequency =
+        itemReach > 0 ? (itemImpressions / itemReach).toFixed(2) : "-";
 
-      // Render hàng
+      // Render dữ liệu ra bảng
       render += `
-            <tr>
-              <td><input type="checkbox"></td>
-              <td>${item.campaign_name}</td>
-              <td>${item.adset_name}</td>
-              <td class="adset_quick_view" data-campaignquick='${
-                item.campaign_name
-              }' data-adsetquick='${
-        item.adset_name
-      }'><i class="fa-solid fa-magnifying-glass-chart"></i></td>
-              <td class="spend" data-value="${spend}">${formatCurrency(
-        spend
+      <tr>
+        <td><input type="checkbox"></td>
+        <td>${campaignItem.campaign_name}</td>
+        <td>${campaignItem.adset_name}</td>
+        <td class="adset_quick_view" data-campaignquick="${
+          campaignItem.campaign_name
+        }" data-adsetquick="${campaignItem.adset_name}">
+          <i class="fa-solid fa-magnifying-glass-chart"></i>
+        </td>
+        <td class="spend" data-value="${itemSpend}">${formatCurrency(
+        itemSpend
       )}</td>
-               
-              <td class="reach" data-value="${reach}">${formatNumber(
-        reach
+        <td class="reach" data-value="${itemReach}">${formatNumber(
+        itemReach
       )}</td>
-              <td class="impressions" data-value="${impressions}">${formatNumber(
-        impressions
+        <td class="impressions" data-value="${itemImpressions}">${formatNumber(
+        itemImpressions
       )}</td>
-              <td class="result" data-value="${resultType}">${
+        <td class="result" data-value="${resultType}">${
         resultType > 0 ? formatNumber(resultType) : "-"
       }</td>
-        <td>${formatLabel(item.optimization_goal)}</td>
-              <td class="costPerResult" data-value="${costPerResult}">${formattedCostPerResult}</td>
-              <td class="frequency" data-value="${frequency}">${frequency}</td>
-    <td class="follows" data-value="${follows}">${formatNumber(follows)}</td>
-       <td class="postReaction" data-value="${postReaction}">${formatNumber(
-        postReaction
+        <td class="costPerResult" data-value="${costPerResult}">${formatCurrency(
+        costPerResult
       )}</td>
-              <td class="messengerStart" data-value="${messengerStart}">${formatNumber(
-        messengerStart
+       <td>${formatLabel(optimizationGoal)}</td>
+        <td class="frequency" data-value="${frequency}">${frequency}</td>
+        <td class="follows" data-value="${likeCount}">${formatNumber(
+        likeCount
       )}</td>
-              <td class="lead" data-value="${lead}">${formatNumber(lead)}</td>
-              <td class="cpm" data-value="${cpm}">${formattedCpm}</td>
-              <td class="engagement" data-value="${postEngagement}">${formatpostEngagement}</td>
-              <td class="video" data-value="${videoView}">${formatNumber(
-        videoView
+        <td class="postReaction" data-value="${reactionCount}">${formatNumber(
+        reactionCount
       )}</td>
-              <td class="photo" data-value="${photoView}">${formatNumber(
-        photoView
+        <td class="messengerStart" data-value="${messageStartCount}">${formatNumber(
+        messageStartCount
       )}</td>
-              <td class="comments" data-value="${comments}">${formatNumber(
-        comments
+        <td class="lead" data-value="${leadCount}">${formatNumber(
+        leadCount
       )}</td>
-              <td class="linkClick" data-value="${linkClick}">${formatNumber(
-        linkClick
+        <td class="cpm" data-value="${cpm}">${formatCurrency(cpm)}</td>
+        <td class="engagement" data-value="${engagementCount}">${formatNumber(
+        engagementCount
       )}</td>
-            </tr>
-          `;
+        <td class="video" data-value="${videoViewCount}">${formatNumber(
+        videoViewCount
+      )}</td>
+        <td class="photo" data-value="${photoViewCount}">${formatNumber(
+        photoViewCount
+      )}</td>
+        <td class="comments" data-value="${commentCount}">${formatNumber(
+        commentCount
+      )}</td>
+        <td class="linkClick" data-value="${linkClickCount}">${formatNumber(
+        linkClickCount
+      )}</td>
+      </tr>
+    `;
     }
   });
+
+  // Cập nhật UI nếu đang ở chế độ performance
   if (performance === "true") {
     updateProgressBar(
-      awarenessSpend,
-      engagementSpend,
-      likepageSpend,
-      messageSpend,
-      trafficSpend,
-      leadSpend
+      metrics.awareness.totalSpend,
+      metrics.engagement.totalSpend,
+      metrics.likepage.totalSpend,
+      metrics.message.totalSpend,
+      metrics.traffic.totalSpend,
+      metrics.lead.totalSpend
     );
+    console.log(metrics.awareness.totalReach);
 
     dom_reach_unit.innerText =
-      awarenessReach > 0
-        ? formatCurrency((awarenessSpend / awarenessReach).toFixed(1))
-        : "-";
+      metrics.awareness.totalReach > 0
+        ? formatCurrency(
+            (
+              metrics.awareness.totalSpend / metrics.awareness.totalReach
+            ).toFixed(2)
+          )
+        : "No goal campaign";
 
     dom_reaction_unit.innerText =
-      leadCount > 0 ? formatCurrency((leadSpend / leadCount).toFixed(0)) : "-";
+      metrics.lead.totalLeadCount > 0
+        ? formatCurrency(
+            (metrics.lead.totalSpend / metrics.lead.totalLeadCount).toFixed(0)
+          )
+        : "No goal campaign";
 
     dom_mess_unit.innerText =
-      messageCount > 0
-        ? formatCurrency((messageSpend / messageCount).toFixed(0))
-        : "-";
+      metrics.message.totalMessageCount > 0
+        ? formatCurrency(
+            (
+              metrics.message.totalSpend / metrics.message.totalMessageCount
+            ).toFixed(0)
+          )
+        : "No goal campaign";
 
     dom_like_unit.innerText =
-      likepageSpend > 0
-        ? formatCurrency((likepageSpend / likepageCount).toFixed(0))
-        : "-";
+      metrics.likepage.totalLikeCount > 0
+        ? formatCurrency(
+            (
+              metrics.likepage.totalSpend / metrics.likepage.totalLikeCount
+            ).toFixed(0)
+          )
+        : "No goal campaign";
   }
 
   dom_detail_tbody.innerHTML = render;
@@ -583,17 +670,46 @@ function sortTableBySpend() {
 // Gọi hàm sắp xếp sau khi render
 
 // Add event listener to the FIND button
+
+function debounce(func, delay) {
+  let timeout;
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), delay);
+  };
+}
+
+const inputElement = document.getElementById("dom_detail_input");
+const debouncedFilter = debounce(filterData, 500); // Chờ 300ms sau khi nhập xong
+
+inputElement.addEventListener("input", (e) => {
+  const keyword = e.target.value.trim();
+  debouncedFilter(keyword);
+  console.log(keyword);
+});
+// document
+//   .getElementById("dom_detail_find")
+//   .addEventListener("click", function () {
+//     dom_main_menu_a[0].click();
+//     filterData(keyword);
+//   });
 document
   .getElementById("dom_detail_find")
   .addEventListener("click", function () {
-    const keyword = document
-      .getElementById("dom_detail_input")
-      .value.toLowerCase()
-      .trim();
-    dom_main_menu_a[0].click();
-    filterData(keyword);
+    const table = document.getElementById("dom_table"); // Thay bằng ID bảng cần xuất
+    if (!table) {
+      console.error("Table not found!");
+      return;
+    }
+
+    // Chuyển đổi table HTML thành worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.table_to_sheet(table);
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+
+    // Xuất file Excel
+    XLSX.writeFile(wb, "export.xlsx");
   });
-const dom_not_data = document.querySelector(".dom_not_data");
 
 function clearFilter() {
   const activeItem = document.querySelector(".dom_quick_filter a.active");
@@ -603,31 +719,26 @@ function clearFilter() {
   localStorage.removeItem("quickID");
 }
 function filterData(campaign_name = "", adset_name = "", query_type) {
-  console.log(allData);
+  console.log(campaign_name);
 
-  let filteredData = [];
-  if (!query_type) {
-    filteredData = allData.filter((item) => {
-      const campaignMatch =
-        !campaign_name ||
-        (item.campaign_name || "").toLowerCase() ===
-          campaign_name.toLowerCase();
-      const adsetMatch =
-        !adset_name ||
-        (item.adset_name || "").toLowerCase() === adset_name.toLowerCase();
-      return campaignMatch && adsetMatch;
-    });
-  } else {
-    const goalList = goalMapping[query_type];
-    if (goalList) {
-      filteredData = allData.filter((item) =>
-        goalList.includes(item.optimization_goal)
-      );
-    } else {
-      console.log("Loại chiến dịch không hợp lệ.");
+  const isMatch = (item, key, value) =>
+    !value || (item[key] || "").toLowerCase().includes(value.toLowerCase());
+
+  const goalList = goalMapping[query_type];
+
+  const filteredData = allData.filter((item) => {
+    console.log(item);
+
+    if (query_type && goalList) {
+      return goalList.includes(item.optimization_goal);
     }
-  }
-  console.log("Filtered Data:", filteredData); // Debug xem lọc đúng không
+    return (
+      isMatch(item, "campaign_name", campaign_name) &&
+      isMatch(item, "adset_name", adset_name)
+    );
+  });
+
+  console.log("Filtered Data:", campaign_name);
   processData(filteredData, "true");
 }
 
@@ -682,12 +793,13 @@ function calculateTotals(allData) {
     follows: 0,
     lead: 0,
     impressions: 0,
+    clicks: 0,
+    message: 0,
   };
 
   // Lặp qua tất cả các adset
   allData.forEach((adset) => {
     // Cộng dồn các giá trị
-
     totals.spend += parseFloat(adset.spend || 0);
     totals.reach += parseInt(adset.reach || 0);
     totals.impressions += parseInt(adset.impressions || 0);
@@ -696,6 +808,15 @@ function calculateTotals(allData) {
     );
     totals.follows += parseInt(getValueFromActions(adset.actions, "like") || 0);
     totals.lead += parseInt(getValueFromActions(adset.actions, "lead") || 0);
+    totals.clicks += parseInt(
+      getValueFromActions(adset.actions, "link_click") || 0
+    );
+    totals.message += parseInt(
+      getValueFromActions(
+        adset.actions,
+        "onsite_conversion.messaging_conversation_started_7d"
+      ) || 0
+    );
   });
   return totals;
 }
@@ -737,11 +858,6 @@ function renderTopCampaigns(allData) {
   });
 }
 
-fetchData(apiUrl);
-fetchDailyInsights2(apiDaily);
-const dom_choose_day = document.querySelector(".dom_choose_day");
-const dom_choosed = document.querySelector(".dom_choosed");
-const dom_choosed_day = document.querySelector(".dom_choosed_day");
 dom_choose_day.addEventListener("click", function (event) {
   if (quickview_adset) {
     alert(
@@ -766,17 +882,13 @@ dom_choosed_day.addEventListener("click", function (event) {
 });
 
 let preset = "this%5fmonth";
-const itemDate = document.querySelectorAll(".dom_choose_day li"); // Select all li items in the dom_choose_day list
-const radio_choose_date = document.querySelectorAll(
-  ".dom_choose_day li .radio_box"
-); // Select all li items in the dom_choose_day list
+// Select all li items in the dom_choose_day list
 radio_choose_date[4].classList.add("active");
 itemDate.forEach((item, index) => {
   item.addEventListener("click", () => {
     if (item.dataset.date != preset) {
       if (index < itemDate.length - 1) {
         const iview = localStorage.getItem("iview");
-        const query = localStorage.getItem("query");
         if (!iview) {
           filterData("");
         }
@@ -785,7 +897,6 @@ itemDate.forEach((item, index) => {
         if (view_adsetActive) {
           view_adsetActive.classList.remove("active");
         }
-        renderReportPerformance();
         startDateGlobal = "";
         endDateGlobal = "";
         const radio_choose_dateActive = document.querySelector(
@@ -815,59 +926,57 @@ itemDate.forEach((item, index) => {
   });
 });
 
-document
-  .querySelector(".apply_custom_date")
-  .addEventListener("click", function () {
-    // Lấy giá trị từ các ô nhập ngày
-    const iview = localStorage.getItem("iview");
-    const query = localStorage.getItem("query");
-    if (!iview) {
-      filterData("");
-    }
-    dom_view_campaign.innerText = "Data for all campaigns";
-    const view_adsetActive = document.querySelector(".view_adset.active");
-    if (view_adsetActive) {
-      view_adsetActive.classList.remove("active");
-    }
-    const startDate = document.getElementById("start").value;
-    const endDate = document.getElementById("end").value;
-    startDateGlobal = startDate;
-    endDateGlobal = endDate;
-    percentChart.classList.remove("adset");
-    // Kiểm tra nếu người dùng nhập thiếu ngày
-    if (!startDate || !endDate) {
-      alert("Please select both start and end dates.");
-      return;
-    }
+// document
+//   .querySelector(".apply_custom_date")
+//   .addEventListener("click", function () {
+//     // Lấy giá trị từ các ô nhập ngày
+//     dom_view_campaign.innerText = "Data for all campaigns";
+//     const view_adsetActive = document.querySelector(".view_adset.active");
+//     if (view_adsetActive) {
+//       view_adsetActive.classList.remove("active");
+//     }
+//     const startDate = document.getElementById("start").value;
+//     const endDate = document.getElementById("end").value;
+//     startDateGlobal = startDate;
+//     endDateGlobal = endDate;
+//     percentChart.classList.remove("adset");
+//     // Kiểm tra nếu người dùng nhập thiếu ngày
+//     if (!startDate || !endDate) {
+//       alert("Please select both start and end dates.");
+//       return;
+//     }
 
-    // Kiểm tra nếu ngày bắt đầu lớn hơn ngày kết thúc
-    if (new Date(startDate) > new Date(endDate)) {
-      alert("Start date cannot be later than the end date.");
-      return;
-    }
-    const radio_choose_dateActive = document.querySelector(
-      ".dom_choose_day li .radio_box.active"
-    );
-    radio_choose_dateActive &&
-      radio_choose_dateActive.classList.remove("active");
-    radio_choose_date[radio_choose_date.length - 1].classList.add("active");
-    // Gọi API với khoảng thời gian cụ thể
-    const apiUrl = `https://graph.facebook.com/v16.0/act_${adAccountId}/insights?level=adset&fields=campaign_name,adset_name,spend,impressions,reach,actions,optimization_goal&time_range={"since":"${startDate}","until":"${endDate}"}&filtering=[{"field":"spend","operator":"GREATER_THAN","value":0}]&access_token=${accessToken}&limit=1000`;
-    preset = null;
-    fetchData(apiUrl);
-    if (!viewCampaigns) {
-      filterData("", "", query);
-      renderReportPerformance();
-    } else {
-      filterData(viewCampaigns, viewAdsets);
-      renderReportPerformance(viewCampaigns, viewAdsets);
-    }
-    dom_choose_day.classList.remove("active");
-    dom_choosed_day.innerText = `${formatDate(startDate)} - ${formatDate(
-      endDate
-    )}`;
-    dom_choosed.innerText = `Custom time range`;
-  });
+//     // Kiểm tra nếu ngày bắt đầu lớn hơn ngày kết thúc
+//     if (new Date(startDate) > new Date(endDate)) {
+//       alert("Start date cannot be later than the end date.");
+//       return;
+//     }
+//     const radio_choose_dateActive = document.querySelector(
+//       ".dom_choose_day li .radio_box.active"
+//     );
+//     radio_choose_dateActive &&
+//       radio_choose_dateActive.classList.remove("active");
+//     radio_choose_date[radio_choose_date.length - 1].classList.add("active");
+//     // Gọi API với khoảng thời gian cụ thể
+//     const apiUrl = `https://graph.facebook.com/v16.0/act_${adAccountId}/insights?level=adset&fields=campaign_name,adset_name,spend,impressions,reach,actions,optimization_goal&time_range={"since":"${startDate}","until":"${endDate}"}&filtering=[{"field":"spend","operator":"GREATER_THAN","value":0}]&access_token=${accessToken}&limit=1000`;
+//     preset = null;
+//     fetchData(apiUrl);
+//     // if (!iview) {
+//     //   filterData("");
+//     // } else if (!viewCampaigns) {
+//     //   filterData("", "", query);
+//     //   renderReportPerformance();
+//     // } else {
+//     //   filterData(viewCampaigns, viewAdsets);
+//     //   renderReportPerformance(viewCampaigns, viewAdsets);
+//     // }
+
+//     dom_choose_day.classList.remove("active");
+//     dom_choosed_day.innerText = `${formatDate(startDate)} - ${formatDate(
+//       endDate
+//     )}`;
+//     dom_choosed.innerText = `Custom time`;
+//   });
 
 // Hàm định dạng ngày thành dd/mm/yyyy
 function formatDate(date) {
@@ -966,9 +1075,6 @@ function getFormattedDateRange(preset) {
 
 dom_choosed_day.innerText = getFormattedDateRange(preset);
 
-const dom_quick_filter = document.querySelector(".dom_quick_filter");
-const dom_table_data = document.querySelector(".dom_table_data");
-
 // Render danh sách
 quick_filter.forEach((item) => {
   const li = document.createElement("li");
@@ -995,94 +1101,81 @@ const dom_view_campaign = document.querySelector(".dom_view_campaign");
 const daily_title = document.querySelector(".daily_title");
 const view_adset = document.querySelector(".view_adset");
 
+// Hàm xử lý Active Class
+function setActive(element, selector) {
+  document
+    .querySelectorAll(selector)
+    .forEach((el) => el.classList.remove("active"));
+  element.classList.add("active");
+}
+
+// Hàm xử lý Filter Click
+function handleFilterClick(item, index) {
+  percentChart.classList.remove("adset");
+  setActive(item, ".dom_quick_filter li a");
+
+  document.querySelector(".view_adset.active")?.classList.remove("active");
+
+  const iview = localStorage.getItem("iview") || 1;
+  dom_main_menu_a[iview * 1].click();
+
+  localStorage.setItem("quickID", index);
+  localStorage.setItem("query", item.dataset.quick);
+
+  dom_view_campaign.innerText = "Data for all campaigns";
+  renderReportPerformance();
+  filterData("", "", item.dataset.quick);
+
+  quickview_adset = false;
+  viewCampaigns = "";
+  viewAdsets = "";
+}
+
+// Gán sự kiện cho Filter Items
 filterItems.forEach((item, index) => {
-  item.addEventListener("click", () => {
-    percentChart.classList.remove("adset");
-    item.classList.add("active");
-    const activeItem = document.querySelectorAll(".dom_quick_filter li a");
-    activeItem.forEach((item) => item.classList.remove("active"));
-    const view_adsetActive = document.querySelector(".view_adset.active");
-    if (view_adsetActive) {
-      view_adsetActive.classList.remove("active");
-    }
-    const iview = localStorage.getItem("iview");
-    if (!iview) {
-      dom_main_menu_a[1].click();
-    } else {
-      dom_main_menu_a[iview * 1].click();
-    }
-    localStorage.setItem("quickID", index);
-    const dataname = item.dataset.quick;
-    localStorage.setItem("query", dataname);
-    dom_view_campaign.innerText = "Data for all campaigns";
-    renderReportPerformance();
-    filterData("", "", dataname);
-    quickview_adset = false;
-    viewCampaigns = "";
-    viewAdsets = "";
-  });
+  item.addEventListener("click", () => handleFilterClick(item, index));
 });
 
-dom_main_menu_a.forEach((item, index) => {
-  item.addEventListener("click", () => {
-    document
-      .querySelector(".dom_main_menu li a.active")
-      ?.classList.remove("active");
-    item.classList.add("active");
+// Hàm xử lý Main Menu Click
+function handleMenuClick(item, index) {
+  setActive(item, ".dom_main_menu li a.active");
 
-    // Xử lý giao diện theo index
-    const views = [
-      () => {
-        // processData(allData);
-        filterData("");
-        dom_contentarea.classList.remove("viewPerformance", "viewDemographic");
-        localStorage.removeItem("iview");
-        const activeFilter = document.querySelector(
-          ".dom_quick_filter a.active"
-        );
-        activeFilter?.classList.remove("active");
-        return;
-      },
-      viewPerformance,
-      viewDemographic,
-    ];
+  const views = [
+    () => {
+      filterData("");
+      dom_contentarea.classList.remove("viewPerformance", "viewDemographic");
+      localStorage.removeItem("iview");
+      document
+        .querySelector(".dom_quick_filter a.active")
+        ?.classList.remove("active");
+    },
+    viewPerformance,
+    viewDemographic,
+  ];
 
-    views[index]?.(); // Gọi hàm tương ứng với index
-    if (index != 0) {
-      localStorage.setItem("iview", index);
-      const quickID = localStorage.getItem("quickID");
-      const activeFilter = document.querySelector(".dom_quick_filter a.active");
-      if (!activeFilter && !quickID) {
-        filterItems[0].classList.add("active");
-        renderReportPerformance();
-        localStorage.setItem("quickID", "0");
-      } else {
-        activeFilter?.classList.remove("active");
-        filterItems[quickID * 1].classList.add("active");
-      }
-      const query = localStorage.getItem("query");
-      // console.log(viewCampaigns, viewAdsets);
-      if (viewCampaigns && viewCampaigns != "Data for all campaigns") {
-        filterData(viewCampaigns, viewAdsets);
-      } else {
-        filterData("", "", query);
-      }
-      // const check = document.querySelector(".dom_view_campaign");
-      // const checkAdset = document.querySelector(".dom_view_campaign.adset");
-      // const checkName = check?.innerText || ""; // Nếu không tìm thấy, gán giá trị rỗng
-      // const checkAdsetName = checkAdset?.innerText || "";
-      // // Kiểm tra và lọc dữ liệu
-      // const campaign =
-      //   checkName === "Data for all campaigns" ? query : checkName;
-      // const adset =
-      //   checkAdsetName === "Data for all adsets" ? " " : checkAdsetName;
-      // console.log("campaign", campaign, "adset", adset);
-      // filterData(campaign, adset);
+  views[index]?.();
+
+  if (index !== 0) {
+    localStorage.setItem("iview", index);
+    const quickID = localStorage.getItem("quickID") || "0";
+    const query = localStorage.getItem("query");
+
+    setActive(filterItems[quickID * 1], ".dom_quick_filter a.active");
+
+    if (viewCampaigns && viewCampaigns !== "Data for all campaigns") {
+      filterData(viewCampaigns, viewAdsets);
+    } else {
+      filterData("", "", query);
     }
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    dom_contentarea.classList.remove("viewQuickAdset");
-    quickview_adset = false;
-  });
+  }
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  dom_contentarea.classList.remove("viewQuickAdset");
+}
+
+// Gán sự kiện cho Main Menu Items
+dom_main_menu_a.forEach((item, index) => {
+  item.addEventListener("click", () => handleMenuClick(item, index));
 });
 
 function viewDemographic() {
@@ -1351,7 +1444,6 @@ function drawAgeGenderChart(ageLabels, maleData, femaleData) {
         },
       },
       barPercentage: 0.8, // Kích thước cột nhỏ lại (0.1 - 1)
-      categoryPercentage: 0.5, // Khoảng cách giữa các cột
     },
   });
 }
@@ -1378,7 +1470,10 @@ function drawRegionChart(regionReach) {
     return;
   }
 
-  const regions = filteredRegions.map(([region]) => region);
+  const regions = filteredRegions.map(([region]) =>
+    region.replace(/\s*(Province|City)$/i, "").trim()
+  );
+
   const reachValues = filteredRegions.map(([, value]) => value);
 
   if (regionChartInstance) {
@@ -1417,8 +1512,7 @@ function drawRegionChart(regionReach) {
           beginAtZero: true,
         },
       },
-      barPercentage: 0.3, // Kích thước cột nhỏ lại (0.1 - 1)
-      categoryPercentage: 0.8, // Khoảng cách giữa các cột
+      barPercentage: 0.6, // Kích thước cột nhỏ lại (0.1 - 1)
     },
   });
 }
@@ -1516,21 +1610,7 @@ function drawGenderChart(genderReach) {
     },
   });
 }
-let dailyChartInstance; // Declare globally
-const view_selected_campaign = document.querySelector(
-  ".view_selected.campaign"
-);
-const view_selected_account = document.querySelector(".view_selected.account");
-const dom_select_view = document.querySelector(".dom_select_view.campaign");
-const dom_select_li = document.querySelectorAll(
-  ".dom_select_view.campaign ul li"
-);
-const dom_select_view_acc = document.querySelector(".dom_select_view.account");
-const dom_select_li_acc = document.querySelectorAll(
-  ".dom_select_view.account ul li"
-);
-let allDatasets = []; // Store datasets globally
-let allDatasets2 = []; // Store datasets globally
+
 dom_select_view_acc.addEventListener("click", () => {
   dom_select_view_acc.classList.toggle("active");
 });
@@ -1630,11 +1710,15 @@ async function fetchDailyInsights(api) {
 
       if (data.error) {
         console.error("API Error:", data.error.message);
+        document.querySelector(".loading").classList.remove("active");
+
         return;
       }
 
       if (!Array.isArray(data.data)) {
         console.warn("API response 'data' is not an array:", data.data);
+        document.querySelector(".loading").classList.remove("active");
+
         break;
       }
 
@@ -1644,13 +1728,6 @@ async function fetchDailyInsights(api) {
       // Check if there's a next page
       nextUrl = data.paging?.next || null;
     }
-    document.querySelector(".loading").classList.remove("active");
-    // No data to process
-    if (allData.length === 0) {
-      console.warn("No data available to draw the chart.");
-      return;
-    }
-
     let dates = [];
     let spendValues = [];
     let reachValues = [];
@@ -1660,6 +1737,23 @@ async function fetchDailyInsights(api) {
     let postEngagement = [];
     let linkClicks = [];
     let leads = [];
+    document.querySelector(".loading").classList.remove("active");
+    // No data to process
+    if (allData.length === 0) {
+      drawDailyChart(
+        dates,
+        spendValues,
+        reachValues,
+        messagingConversations,
+        postReactions,
+        pageLikes,
+        postEngagement,
+        linkClicks,
+        leads
+      );
+      console.warn("No data available to draw the chart.");
+      return;
+    }
 
     allData.forEach((entry) => {
       const date = entry?.date_start || "Unknown Date";
@@ -1711,8 +1805,8 @@ async function fetchDailyInsights(api) {
     });
 
     if (dates.length === 0) {
-      console.warn("No valid data to draw the chart.");
       document.querySelector(".loading").classList.remove("active");
+      console.warn("No valid data to draw the chart.");
       return;
     }
 
@@ -1731,6 +1825,7 @@ async function fetchDailyInsights(api) {
     document.querySelector(".loading").classList.remove("active");
     console.error("Fetch error:", error.message);
   }
+  document.querySelector(".loading").classList.remove("active");
 }
 // Draw the daily chart with given data
 let dataDailyFilter = "Spend";
@@ -1904,13 +1999,6 @@ async function fetchDailyInsights2(api) {
       // Check if there's a next page
       nextUrl = data.paging?.next || null;
     }
-
-    // No data to process
-    if (allData.length === 0) {
-      console.warn("No data available to draw the chart.");
-      return;
-    }
-
     let dates = [];
     let spendValues = [];
     let reachValues = [];
@@ -1920,6 +2008,22 @@ async function fetchDailyInsights2(api) {
     let postEngagement = [];
     let linkClicks = [];
     let leads = [];
+    // No data to process
+    if (allData.length === 0) {
+      drawDailyChart2(
+        dates,
+        spendValues,
+        reachValues,
+        messagingConversations,
+        postReactions,
+        pageLikes,
+        postEngagement,
+        linkClicks,
+        leads
+      );
+      console.warn("No data available to draw the chart.");
+      return;
+    }
 
     allData.forEach((entry) => {
       const date = entry?.date_start || "Unknown Date";
@@ -2425,7 +2529,6 @@ function updateProgressBar(
       },
       // Chỉnh chiều rộng cột
       barPercentage: 0.7, // Kích thước cột nhỏ lại (0.1 - 1)
-      categoryPercentage: 0.8, // Khoảng cách giữa các cột
     },
   });
 }
@@ -2476,11 +2579,7 @@ function filterAdsetByCampaign(selectedCampaign) {
 
   return uniqueAdsetNames;
 }
-const viewAdsetUl = document.querySelector(".view_adset ul");
-const viewAdsetTitle = document.querySelector(".dom_view_campaign.adset");
-const viewAdsetUlList = document.querySelector(
-  ".view_adset .dom_title_report_list > div"
-);
+
 function renderTitleReport() {
   const uniqueCampaignNames = filterCampaignQuery();
   const dom_title_report_list_ul = document.querySelector(
@@ -2693,6 +2792,7 @@ function drawHourlyChart(hours, impressions, spend) {
       plugins: {
         legend: {
           position: "top",
+          align: "end",
         },
       },
       scales: {
@@ -2746,23 +2846,28 @@ fixapp.addEventListener("click", () => {
 // });
 
 function updateDonut(impression, reach) {
+  const donut = document.querySelector(".semi-donut");
+  const frequencyNumber = donut.querySelector(".frequency_number");
+
   // Kiểm tra dữ liệu hợp lệ
-  if (!impression || !reach || reach === 0) return;
+  if (!impression || !reach || reach === 0) {
+    donut.style.setProperty("--percentage", 0); // Đặt % bằng 0
+    donut.style.setProperty("--fill", "#ccc"); // Màu xám nhạt cho trạng thái trống
+    frequencyNumber.textContent = "0"; // Hiển thị số 0
+    return;
+  }
 
   // Tính toán tỷ lệ Impression/Reach
-  const frequency = (impression / reach).toFixed(2); // Làm tròn 1 chữ số thập phân
+  const frequency = (impression / reach).toFixed(2);
   const percentage = Math.floor((impression * 100) / reach / 4);
 
   // Cập nhật các giá trị trong HTML
-  const donut = document.querySelector(".semi-donut"); // Lấy thẻ semi-donut
-  const frequencyNumber = donut.querySelector(".frequency_number"); // Lấy phần tử chứa frequency number
-  console.log(percentage);
+  donut.style.setProperty("--percentage", percentage);
+  donut.style.setProperty("--fill", "#ffa900");
 
-  donut.style.setProperty("--percentage", percentage); // Cập nhật phần trăm
-  donut.style.setProperty("--fill", "#ffa900"); // Màu sắc của vòng tròn (có thể thay đổi)
-
-  frequencyNumber.textContent = frequency; // Cập nhật số frequency
+  frequencyNumber.textContent = frequency;
 }
+
 const dom_quick_close = document.querySelector(".dom_quick_close");
 const dom_quickadset_overlay = document.querySelector(
   ".dom_quickadset_overlay"
@@ -2779,164 +2884,231 @@ function handleCloseQuickAdset() {
   const iview = localStorage.getItem("iview");
   if (iview) {
     dom_contentarea.classList.add("viewPerformance");
-  } else {
-    filterData("");
-  }
-  if (viewCampaigns && viewCampaigns != "Data for all campaigns") {
-    console.log(viewCampaigns);
+    if (viewCampaigns && viewCampaigns !== "Data for all campaigns") {
+      renderReportPerformance(viewCampaigns, viewAdsets);
+    } else {
+      console.log("ELSE");
 
-    filterData(viewCampaigns, viewAdsets);
-    renderReportPerformance(viewCampaigns, viewAdsets);
+      renderReportPerformance();
+    }
   } else {
     renderReportPerformance();
-    filterData("", "", query);
   }
+
   dom_table_data.scrollIntoView();
 }
 function renderReportPerformance(campaign_name = "", adset_name = "") {
   renderTitleReport();
   const dom_title_reporth2 = document.querySelector(".dom_title_report h2");
   const iview = localStorage.getItem("iview");
-  const query = localStorage.getItem("query");
+  const query = localStorage.getItem("query") || "";
   const quickID = localStorage.getItem("quickID");
   const activeItem = document.querySelector(".dom_quick_filter a.active");
-  if (!quickview_adset) {
-    if (!activeItem && iview) {
-      dom_main_menu_a[iview * 1].click();
-    } else if (iview) {
-      activeItem?.classList.remove("active");
-      filterItems[quickID * 1].classList.add("active");
-    }
-    if (!campaign_name) {
-      if (!iview) {
-        filterData("");
-      } else {
-        filterData("", "", query);
-      }
-    } else {
-      filterData(campaign_name, adset_name);
-    }
 
+  // Xử lý quickview
+
+  // Xây dựng filter động
+  const filters = [{ field: "spend", operator: "GREATER_THAN", value: 0 }];
+
+  if (campaign_name) {
+    filters.push({
+      field: "campaign.name",
+      operator: "EQUAL",
+      value: campaign_name,
+    });
+  }
+  if (adset_name) {
+    filters.push({ field: "adset.name", operator: "EQUAL", value: adset_name });
+  }
+  if (!adset_name && !campaign_name) {
+    filters.push({
+      field: "adset.optimization_goal",
+      operator: "IN",
+      value: goalMapping[query],
+    });
+  }
+
+  const filtering = JSON.stringify(filters);
+
+  // API endpoints
+  const breakdowns = {
+    platform: "campaign_name,reach&breakdowns=publisher_platform",
+    age: "campaign_name,reach&breakdowns=age,gender",
+    region: "campaign_name,reach&breakdowns=region",
+    gender: "campaign_name,reach&breakdowns=gender",
+    daily: "spend,reach,actions,date_start&time_increment=1",
+    device: "campaign_name,impressions&breakdowns=impression_device",
+    hourly:
+      "campaign_name,impressions,spend&breakdowns=hourly_stats_aggregated_by_advertiser_time_zone",
+  };
+
+  const fetchFunctions = {
+    platform: fetchDataFlat,
+    age: fetchDataAge,
+    region: fetchRegionData,
+    gender: fetchGenderData,
+    daily: fetchDailyInsights,
+    device: fetchImpressionData,
+    hourly: fetchHourlyData,
+  };
+
+  // Tự động gọi các API
+  Object.entries(breakdowns).forEach(([key, breakdown]) => {
+    const apiUrl = createApiUrl(
+      breakdown,
+      adAccountId,
+      filtering,
+      preset,
+      accessToken
+    );
+    fetchFunctions[key](apiUrl);
+  });
+  if (!quickview_adset) {
+    if (iview) {
+      activeItem?.classList.remove("active");
+      dom_main_menu_a[iview]?.click();
+      filterItems[quickID]?.classList.add("active");
+      console.log(campaign_name);
+
+      filterData(campaign_name, adset_name, query);
+    } else {
+      filterData("");
+    }
     dom_title_reporth2.innerText = `Report for ${query}`;
   } else {
     dom_title_reporth2.innerText = `Report for ${campaign_name} - ${adset_name}`;
     filterData(campaign_name, adset_name);
   }
-  // const campaigns = filterCampaignQuery(query);
-  let filtering = "";
-  console.log(campaign_name, adset_name);
-  if (campaign_name && adset_name) {
-    filtering = JSON.stringify([
-      {
-        field: "campaign.name",
-        operator: "EQUAL",
-        value: campaign_name,
-      },
-      {
-        field: "spend",
-        operator: "GREATER_THAN",
-        value: 0,
-      },
-      {
-        field: "adset.name",
-        operator: "EQUAL",
-        value: adset_name, // Giá trị lọc theo adset, cần truyền từ bên ngoài
-      },
-    ]);
-  } else if (campaign_name) {
-    filtering = JSON.stringify([
-      {
-        field: "adset.optimization_goal",
-        operator: "IN",
-        value: goalMapping[query], // Lọc theo optimization_goal
-      },
-      {
-        field: "spend",
-        operator: "GREATER_THAN",
-        value: 0,
-      },
-      {
-        field: "campaign.name",
-        operator: "EQUAL",
-        value: campaign_name,
-      },
-    ]);
-  } else {
-    filtering = JSON.stringify([
-      {
-        field: "adset.optimization_goal",
-        operator: "IN",
-        value: goalMapping[query], // Lọc theo optimization_goal
-      },
-      {
-        field: "spend",
-        operator: "GREATER_THAN",
-        value: 0,
-      },
-    ]);
-  }
-
-  const apiUrls = {
-    platform: createApiUrl(
-      "campaign_name,reach&breakdowns=publisher_platform",
-      adAccountId,
-      filtering,
-      preset,
-      accessToken
-    ),
-    age: createApiUrl(
-      "campaign_name,reach&breakdowns=age,gender",
-      adAccountId,
-      filtering,
-      preset,
-      accessToken
-    ),
-    region: createApiUrl(
-      "campaign_name,reach&breakdowns=region",
-      adAccountId,
-      filtering,
-      preset,
-      accessToken
-    ),
-    gender: createApiUrl(
-      "campaign_name,reach&breakdowns=gender",
-      adAccountId,
-      filtering,
-      preset,
-      accessToken
-    ),
-    daily: createApiUrl(
-      "spend,reach,actions,date_start&time_increment=1",
-      adAccountId,
-      filtering,
-      preset,
-      accessToken
-    ),
-    device: createApiUrl(
-      "campaign_name,impressions&breakdowns=impression_device",
-      adAccountId,
-      filtering,
-      preset,
-      accessToken
-    ),
-    hourly: createApiUrl(
-      "campaign_name,impressions,spend&breakdowns=hourly_stats_aggregated_by_advertiser_time_zone",
-      adAccountId,
-      filtering,
-      preset,
-      accessToken
-    ),
-  };
-
-  // Gọi các API tương ứng
-  fetchDataFlat(apiUrls.platform);
-  fetchDataAge(apiUrls.age);
-  fetchRegionData(apiUrls.region);
-  fetchGenderData(apiUrls.gender);
-  fetchDailyInsights(apiUrls.daily);
-  fetchImpressionData(apiUrls.device);
-  fetchHourlyData(apiUrls.hourly);
-  // Lọc dữ liệu hiển thị
-
-  console.log("fetchData Detail");
 }
+
+document.addEventListener("click", function (event) {
+  const activeElement = document.querySelector(".dom_choose_day.active");
+
+  // Kiểm tra nếu có phần tử active và click không nằm trong nó hoặc các phần tử con
+  if (activeElement && !event.target.closest(".dom_choose_day")) {
+    activeElement.classList.remove("active");
+  }
+});
+
+// Hàm lấy tham số từ URL
+function getQueryParam(param) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(param);
+}
+
+// Hàm cập nhật URL khi chọn ngày mới
+function updateURL(start, end) {
+  const newURL = new URL(window.location);
+  newURL.searchParams.set("start", formatToDMY(start));
+  newURL.searchParams.set("end", formatToDMY(end));
+  window.history.pushState({}, "", newURL); // Cập nhật URL mà không tải lại trang
+}
+
+// Chuyển định dạng yyyy-mm-dd -> dd/mm/yyyy (để hiển thị trên URL)
+function formatToDMY(dateStr) {
+  const parts = dateStr.split("-");
+  return `${parts[2]}-${parts[1]}-${parts[0]}`; // dd/mm/yyyy
+}
+
+// Chuyển định dạng dd/mm/yyyy -> yyyy-mm-dd (để dùng với input type="date")
+function formatToISO(dateStr) {
+  const parts = dateStr.split("-");
+  if (parts.length === 3) {
+    return `${parts[2]}-${parts[1]}-${parts[0]}`; // yyyy-mm-dd
+  }
+  return "";
+}
+
+// Kiểm tra ngày hợp lệ
+function isValidDate(dateStr) {
+  return !isNaN(new Date(dateStr).getTime());
+}
+
+document
+  .querySelector(".apply_custom_date")
+  .addEventListener("click", function () {
+    // Lấy giá trị từ các ô nhập ngày
+    dom_view_campaign.innerText = "Data for all campaigns";
+    const view_adsetActive = document.querySelector(".view_adset.active");
+    if (view_adsetActive) {
+      view_adsetActive.classList.remove("active");
+    }
+
+    const startDate = document.getElementById("start").value;
+    const endDate = document.getElementById("end").value;
+    startDateGlobal = startDate;
+    endDateGlobal = endDate;
+    percentChart.classList.remove("adset");
+
+    // Kiểm tra nếu người dùng nhập thiếu ngày
+    if (!startDate || !endDate) {
+      alert("Please select both start and end dates.");
+      return;
+    }
+
+    // Kiểm tra nếu ngày bắt đầu lớn hơn ngày kết thúc
+    if (new Date(startDate) > new Date(endDate)) {
+      alert("Start date cannot be later than the end date.");
+      return;
+    }
+
+    updateURL(startDate, endDate); // Cập nhật URL
+
+    const radio_choose_dateActive = document.querySelector(
+      ".dom_choose_day li .radio_box.active"
+    );
+    radio_choose_dateActive &&
+      radio_choose_dateActive.classList.remove("active");
+    radio_choose_date[radio_choose_date.length - 1].classList.add("active");
+
+    // Gọi API với khoảng thời gian cụ thể
+    const apiUrl = `https://graph.facebook.com/v16.0/act_${adAccountId}/insights?level=adset&fields=campaign_name,adset_name,spend,impressions,reach,actions,optimization_goal&time_range={"since":"${startDate}","until":"${endDate}"}&filtering=[{"field":"spend","operator":"GREATER_THAN","value":0}]&access_token=${accessToken}&limit=1000`;
+    const apiDaily = `https://graph.facebook.com/v16.0/act_${adAccountId}/insights?fields=spend,reach,actions,date_start&time_increment=1&time_range={"since":"${startDate}","until":"${endDate}"}&access_token=${accessToken}&limit=1000`;
+    preset = null;
+    fetchData(apiUrl);
+    fetchDailyInsights2(apiDaily);
+
+    dom_choose_day.classList.remove("active");
+    dom_choosed_day.innerText = `${formatDate(startDate)} - ${formatDate(
+      endDate
+    )}`;
+    dom_choosed.innerText = `Custom time`;
+  });
+
+// Hàm khởi tạo ngày từ URL
+function initDateFromURL() {
+  const start = getQueryParam("start");
+  const end = getQueryParam("end");
+  console.log(start, end);
+
+  if (start && end) {
+    const startDate = formatToISO(start);
+    const endDate = formatToISO(end);
+    console.log(startDate, endDate);
+
+    if (!isValidDate(startDate) || !isValidDate(endDate)) {
+      console.warn("Invalid date format in URL.");
+      return;
+    }
+
+    document.getElementById("start").value = startDate;
+    document.getElementById("end").value = endDate;
+
+    // Gọi sự kiện click để áp dụng bộ lọc như khi bấm nút
+    document.querySelector(".apply_custom_date").click();
+  }
+}
+
+// Lắng nghe sự kiện khi người dùng chọn ngày
+
+// Gọi hàm khi trang tải
+document.addEventListener("DOMContentLoaded", () => {
+  const start = getQueryParam("start");
+  const end = getQueryParam("end");
+  if (start && end) {
+    initDateFromURL();
+  } else {
+    fetchData(apiUrl);
+    fetchDailyInsights2(apiDaily);
+  }
+});
