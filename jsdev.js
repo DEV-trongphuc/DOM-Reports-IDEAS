@@ -468,7 +468,8 @@ function processData(data, performance) {
         getValueFromActions(actions, "post_engagement") || 0;
       const reactionCount = getValueFromActions(actions, "post_reaction") || 0;
       const likeCount = getValueFromActions(actions, "like") || 0;
-      const leadCount = getValueFromActions(actions, "lead") || 0;
+      const leadCount =
+        getValueFromActions(actions, "onsite_conversion.lead_grouped") || 0;
       const commentCount = getValueFromActions(actions, "comment") || 0;
       const linkClickCount = getValueFromActions(actions, "link_click") || 0;
       const photoViewCount = getValueFromActions(actions, "photo_view") || 0;
@@ -807,7 +808,9 @@ function calculateTotals(allData) {
       getValueFromActions(adset.actions, "post_reaction") || 0
     );
     totals.follows += parseInt(getValueFromActions(adset.actions, "like") || 0);
-    totals.lead += parseInt(getValueFromActions(adset.actions, "lead") || 0);
+    totals.lead += parseInt(
+      getValueFromActions(adset.actions, "onsite_conversion.lead_grouped") || 0
+    );
     totals.clicks += parseInt(
       getValueFromActions(adset.actions, "link_click") || 0
     );
@@ -1787,7 +1790,7 @@ async function fetchDailyInsights(api) {
           if (action?.action_type === "link_click") {
             linkclick = action?.value || 0;
           }
-          if (action?.action_type === "lead") {
+          if (action?.action_type === "onsite_conversion.lead_grouped") {
             lead = action?.value || 0;
           }
         });
@@ -2057,7 +2060,7 @@ async function fetchDailyInsights2(api) {
           if (action?.action_type === "link_click") {
             linkclick = action?.value || 0;
           }
-          if (action?.action_type === "lead") {
+          if (action?.action_type === "onsite_conversion.lead_grouped") {
             lead = action?.value || 0;
           }
         });
