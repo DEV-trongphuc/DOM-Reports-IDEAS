@@ -22,7 +22,7 @@ let viewAdsets = "";
 let quickview_adset = false;
 let currentChart = null; // Biến lưu trữ đối tượng biểu đồ hiện tại
 
-const apiUrl = `https://graph.facebook.com/v16.0/act_${adAccountId}/insights?level=adset&fields=campaign_name,adset_name,spend,impressions,reach,actions,optimization_goal&date_preset=this%5fmonth&filtering=[{"field":"spend","operator":"GREATER_THAN","value":0}]&access_token=${accessToken}&limit=1000`;
+const apiUrl = `https://graph.facebook.com/v16.0/act_${adAccountId}/insights?level=adset&fields=campaign_name,adset_name,adset_id,spend,impressions,reach,actions,optimization_goal&date_preset=this%5fmonth&filtering=[{"field":"spend","operator":"GREATER_THAN","value":0}]&access_token=${accessToken}&limit=1000`;
 const apiDaily = `https://graph.facebook.com/v16.0/act_${adAccountId}/insights?fields=spend,reach,actions,date_start&time_increment=1&date_preset=this%5fmonth&access_token=${accessToken}&limit=1000`;
 
 let allData = [];
@@ -918,7 +918,7 @@ itemDate.forEach((item, index) => {
         dom_choosed_day.innerText = formattedDate;
 
         // Gọi API với ngày đã chọn
-        const apiUrl = `https://graph.facebook.com/v16.0/act_${adAccountId}/insights?level=adset&fields=campaign_name,adset_name,spend,impressions,reach,actions,optimization_goal&date_preset=${datePreset}&filtering=[{"field":"spend","operator":"GREATER_THAN","value":0}]&access_token=${accessToken}&limit=1000`;
+        const apiUrl = `https://graph.facebook.com/v16.0/act_${adAccountId}/insights?level=adset&fields=campaign_name,adset_id,adset_name,spend,impressions,reach,actions,optimization_goal&date_preset=${datePreset}&filtering=[{"field":"spend","operator":"GREATER_THAN","value":0}]&access_token=${accessToken}&limit=1000`;
         const apiDaily = `https://graph.facebook.com/v16.0/act_${adAccountId}/insights?fields=spend,reach,actions,date_start&time_increment=1&date_preset=${datePreset}&access_token=${accessToken}&limit=1000`;
         preset = datePreset;
         fetchData(apiUrl);
@@ -3065,7 +3065,7 @@ document
     radio_choose_date[radio_choose_date.length - 1].classList.add("active");
 
     // Gọi API với khoảng thời gian cụ thể
-    const apiUrl = `https://graph.facebook.com/v16.0/act_${adAccountId}/insights?level=adset&fields=campaign_name,adset_name,spend,impressions,reach,actions,optimization_goal&time_range={"since":"${startDate}","until":"${endDate}"}&filtering=[{"field":"spend","operator":"GREATER_THAN","value":0}]&access_token=${accessToken}&limit=1000`;
+    const apiUrl = `https://graph.facebook.com/v16.0/act_${adAccountId}/insights?level=adset&fields=campaign_name,adset_name,spend,impressions,reach,actions,optimization_goal,status&time_range={"since":"${startDate}","until":"${endDate}"}&filtering=[{"field":"spend","operator":"GREATER_THAN","value":0}]&access_token=${accessToken}&limit=1000`;
     const apiDaily = `https://graph.facebook.com/v16.0/act_${adAccountId}/insights?fields=spend,reach,actions,date_start&time_increment=1&time_range={"since":"${startDate}","until":"${endDate}"}&access_token=${accessToken}&limit=1000`;
     preset = null;
     fetchData(apiUrl);
@@ -3103,7 +3103,32 @@ function initDateFromURL() {
 }
 
 // Lắng nghe sự kiện khi người dùng chọn ngày
+function renderTopAdset(allData) {
+  // Nhóm các adset theo tên campaign
+  const adsetTop = allData.reduce((totals, adset) => {
+    const adsetName = adset.adset_name || "Unknown Campaign"; // Lấy tên campaign hoặc gán mặc định nếu không có
+    const spend = parseFloat(adset.spend) || 0; // Lấy spend hoặc gán 0 nếu không có
+    // Kiểm tra campaign đã tồn tại trong danh sách chưa
+    totals.push({ name: adsetName, spend });
+    return totals;
+  }, []);
 
+  // Sắp xếp các campaign theo tổng spend giảm dần
+  adsetTop.sort((a, b) => b.spend - a.spend);
+
+  // Render lên giao diện
+  const ulElement = document.querySelector(".dom_chart_most_ul"); // Phần tử danh sách trên UI
+  ulElement.innerHTML = ""; // Xóa nội dung cũ nếu có
+  adsetTop.forEach((campaign) => {
+    const li = document.createElement("li");
+    li.innerHTML = `<p><span>${campaign.name}</span> <span>${formatCurrency(
+      campaign.spend
+    )}</span></p> <p> <span style="width: ${
+      (campaign.spend * 100) / adsetTop[0].spend
+    }%"></span> </p>`;
+    ulElement.appendChild(li);
+  });
+}
 // Gọi hàm khi trang tải
 document.addEventListener("DOMContentLoaded", () => {
   const start = getQueryParam("start");
@@ -3115,3 +3140,57 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchDailyInsights2(apiDaily);
   }
 });
+dom_highest_switch_btn = document.querySelectorAll(
+  ".dom_highest_switch > div p"
+);
+dom_highest_switch_btn.forEach((item, index) => {
+  item.addEventListener("click", () => {
+    setActive(item, ".dom_highest_switch > div p");
+    if (index == 0) {
+      renderTopCampaigns(allData);
+    } else {
+      renderTopAdset(allData);
+    }
+  });
+});
+
+async function getAdPostFromAdSet(adset_id) {
+  try {
+    // 🔹 Bước 1: Lấy danh sách Ads trong Adset
+    const adsResponse = await fetch(
+      `https://graph.facebook.com/v16.0/${adset_id}/ads?fields=id,name,creative&access_token=${accessToken}`
+    );
+    const adsData = await adsResponse.json();
+
+    if (!adsData.data || adsData.data.length === 0) {
+      console.log("Không có quảng cáo nào trong Adset này.");
+      return;
+    }
+
+    // 🔹 Bước 2: Lấy bài post từ creative của Ads đầu tiên
+    const adCreativeId = adsData.data[0]?.creative?.id;
+    if (!adCreativeId) {
+      console.log("Không tìm thấy Creative cho Ad này.");
+      return;
+    }
+
+    const creativeResponse = await fetch(
+      `https://graph.facebook.com/v16.0/${adCreativeId}?fields=object_story_id&access_token=${accessToken}`
+    );
+    const creativeData = await creativeResponse.json();
+    const postId = creativeData.object_story_id;
+
+    if (!postId) {
+      console.log("Không tìm thấy bài post của quảng cáo.");
+      return;
+    }
+
+    // 🔹 Bước 3: Hiển thị link bài post
+    console.log(`Bài post quảng cáo: https://www.facebook.com/${postId}`);
+  } catch (error) {
+    console.error("Lỗi khi lấy bài post quảng cáo:", error);
+  }
+}
+
+// 🟢 Gọi hàm với adset_id và access_token của bạn
+getAdPostFromAdSet("120215999275420636");
