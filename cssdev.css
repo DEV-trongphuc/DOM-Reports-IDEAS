@@ -73,7 +73,7 @@ body::-webkit-scrollbar {
   width: 15px;
 }
 #dom_contentarea::-webkit-scrollbar {
-  width: 15px;
+  width: 10px;
 }
 
 ::-webkit-scrollbar-track {
@@ -261,7 +261,7 @@ body::-webkit-scrollbar-thumb:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 4rem;
+  padding: 0 3rem;
   z-index: 999;
   width: calc(100vw - 32rem);
   transition: 0.2s;
@@ -398,9 +398,9 @@ body::-webkit-scrollbar-thumb:hover {
 .custom_date::after {
   position: absolute;
   content: "";
-  width: 20vw;
-  height: 80vh;
-  top: -300%;
+  width: 40vw;
+  height: 70vh;
+  top: -200%;
   left: 0rem;
   z-index: -1;
 }
@@ -540,6 +540,7 @@ body::-webkit-scrollbar-thumb:hover {
   width: 35px;
   height: 35px;
   border-radius: 5px;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
 }
 
 .dom_total {
@@ -565,8 +566,8 @@ body::-webkit-scrollbar-thumb:hover {
   justify-content: space-between;
 }
 .dom_total_item > div:last-child > p:first-child {
+  font-size: 1.5rem;
   font-weight: bold;
-  font-size: 1.6rem;
 }
 .dom_total_item > div:last-child > p:last-child {
   display: flex;
@@ -808,12 +809,16 @@ body::-webkit-scrollbar-thumb:hover {
 }
 #dom_detail_find {
   background-color: var(--mainClr);
-  padding: 1.1rem 4rem;
+  padding: 1.3rem 2rem;
   cursor: pointer;
   color: white;
   font-weight: bold;
   border-radius: 9px;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.15);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
 }
 .dom_detail_table {
   width: 100%;
@@ -1056,7 +1061,7 @@ input[type="checkbox"]:checked::before {
   text-align: center;
 }
 
-.dom_detail_table tbody td:nth-child(9) {
+.dom_detail_table tbody td:nth-child(10) {
   text-align: left;
 }
 .dom_detail_table tbody td:nth-child(2),
@@ -1076,18 +1081,18 @@ input[type="checkbox"]:checked::before {
 .dom_detail_table tbody td:nth-child(4) {
   text-align: right;
 }
-.dom_detail_table tbody td:nth-child(9) {
-  margin-left: 2rem;
-  padding-left: 4rem;
+.dom_detail_table tbody td:nth-child(10) {
+  /* margin-left: 2rem; */
+  padding-left: 5rem;
   padding-right: 2rem;
   min-width: 18rem;
   position: relative;
 }
-.dom_detail_table tbody td:nth-child(9)::after {
+.dom_detail_table tbody td:nth-child(10)::after {
   content: "";
   position: absolute;
   top: 50%;
-  left: 10%;
+  left: 20%;
   transform: translate(-50%, -50%);
   width: 10px;
   height: 10px;
@@ -1354,6 +1359,8 @@ input[type="checkbox"]:checked::before {
   opacity: 0;
   pointer-events: none;
   transition: 0.3s;
+  max-height: 60vh;
+  overflow-y: auto;
 }
 .dom_title_report_list > div.active ul {
   pointer-events: all;
@@ -1644,8 +1651,37 @@ input[type="checkbox"]:checked::before {
 #dom_contentarea.viewQuickAdset .dom_quick_close {
   display: inline-block;
 }
+.dom_highest_switch {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 2rem;
+}
+.dom_highest_switch > div {
+  display: flex;
+  align-items: center;
+}
+.dom_highest_switch h2 {
+  padding: 0;
+}
+.dom_highest_switch > div p {
+  background-color: var(--fadeClr);
+  padding: 1rem 2rem;
+  margin-left: 1rem;
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+.dom_highest_switch > div p.active {
+  background-color: var(--mainClr);
+  color: white;
+}
 
 @media (max-width: 768px) {
+  .custom_date {
+    left: -140%;
+    width: max-content;
+  }
   .percentChart .dom_chart_item.dom_view_adset.dom_event_ul {
     width: 100%;
   }
@@ -1679,6 +1715,12 @@ input[type="checkbox"]:checked::before {
   .live-indicator {
     transform: translateY(-1px);
     margin-right: -5px;
+  }
+  .dom_detail_table tbody td:nth-child(10) {
+    min-width: max-content;
+  }
+  .dom_detail_table tbody td:nth-child(10)::after {
+    left: 15%;
   }
   .dom_title_report {
     font-size: 1.2rem;
@@ -1898,5 +1940,9 @@ input[type="checkbox"]:checked::before {
   }
   .dom_chart_total.viewPerformance > .dom_chart_item {
     width: 100%;
+  }
+
+  #dom_contentarea::-webkit-scrollbar {
+    width: 0px;
   }
 }
