@@ -19,7 +19,11 @@
     ></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-    <link rel="icon" href="./DOM-img/faviicon.png" type="image/png" />
+    <link
+      rel="icon"
+      href="https://dom-reports-ideas.netlify.app/DOM-img/faviicon.png"
+      type="image/png"
+    />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -27,7 +31,7 @@
       href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/dom.css" />
+    <link rel="stylesheet" href="./dom.css" />
   </head>
   <body>
     <div id="dom_sidebar">
@@ -302,9 +306,7 @@
           </div>
           <div class="dom_cpr_reach">
             <p id="dom_reaction_unit"></p>
-            <p
-              onclick="alert('Only calculated on Engagement & objectives Reaction: Like, Love, Haha, Wow, Sad,...')"
-            >
+            <p onclick="alert('Only calculated on Lead Campaign')">
               <span>Unit cost</span> <i class="fa-solid fa-circle-info"></i>
             </p>
           </div>
@@ -507,7 +509,13 @@
           <canvas id="platformChart"></canvas>
         </div> -->
         <div class="dom_chart_item list">
-          <h2>Highest campaign spent</h2>
+          <div class="dom_highest_switch">
+            <h2>Highest spent</h2>
+            <div class="">
+              <p class="dom_highest_switch_campaign active">Campaign</p>
+              <p class="dom_highest_switch_adset">Adset</p>
+            </div>
+          </div>
           <div class="dom_chart_item_highest">
             <p class="dom_chart_most_title">
               <span>Name</span> <span>Spend</span>
