@@ -31,7 +31,7 @@
       href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./dom.css" />
+    <link rel="stylesheet" href="./dom_oodo.css" />
   </head>
   <body>
     <div id="dom_sidebar">
@@ -64,6 +64,11 @@
         <li>
           <a class="">
             <i class="fa-solid fa-chart-pie"></i> <span>Demographic</span></a
+          >
+        </li>
+        <li>
+          <a class="">
+            <i class="fa-solid fa-user-graduate"></i> <span>Leads Oodo</span></a
           >
         </li>
         <!-- <li>
@@ -711,6 +716,83 @@
           </ul>
         </div>
       </div>
+      <div class="dom_chart_total only oodo viewReportOodo">
+        <div class="dom_chart_item">
+          <div class="">
+            <a
+              href="https://erp.ideas.orissolution.com/web/login"
+              target="_blank"
+            >
+              <img class="logo_oodo" src="./DOM-img/Odoo-Logo.wine.png"
+            /></a>
+            <h2>Total Leads Created: <span class="oodo_total"></span></h2>
+            <div id="progressBar">
+              <p class="segment"></p>
+              <p class="segment"></p>
+              <p class="segment"></p>
+              <p class="segment"></p>
+              <p class="segment"></p>
+            </div>
+            <div class="progess_label">
+              <p>Needed: <b>70%</b></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="dom_chart_total circle viewReportOodo">
+        <div class="dom_chart_item circle leadchart">
+          <h2>Saleperson - Lead & Needed</h2>
+          <canvas id="leadChart"></canvas>
+        </div>
+        <div class="dom_chart_item list">
+          <div class="dom_highest_switch">
+            <h2>Detail Tags</h2>
+            <div class="">
+              <p class="sale_switch active">Phúc</p>
+              <p class="sale_switch">Đan</p>
+              <p class="sale_switch">Nhi</p>
+            </div>
+          </div>
+          <div class="dom_chart_item_highest">
+            <ul class="dom_chart_most_ul oodo"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="dom_table_data oodo viewReportOodo">
+        <div class="dom_detail_head">
+          <h2>Detail Leads</h2>
+          <div>
+            <input
+              id="dom_detail_input"
+              class="oodo"
+              placeholder='Filter by "Phone & Saleperson"'
+              type="text"
+            />
+            <p id="dom_detail_find">Export <i class="fa-solid fa-table"></i></p>
+          </div>
+        </div>
+        <div class="dom_table_container oodo">
+          <div>
+            <table class="dom_detail_table" id="dom_table_oodo">
+              <thead>
+                <tr>
+                  <th>Create Date</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Tag</th>
+                  <th>Saleperson</th>
+                  <th>Description</th>
+                  <th>Last_update</th>
+                  <th>Medium</th>
+                </tr>
+              </thead>
+              <tbody class="dom_detail_tbody_oodo"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
       <div class="loading">
         <span class="loader"></span>
@@ -765,6 +847,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
     <script src="./domvar.js"></script>
-    <script src="./dom.js"></script>
+    <script src="./dom_oodo.js"></script>
   </body>
 </html>
