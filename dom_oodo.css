@@ -1788,6 +1788,7 @@ input[type="checkbox"]:checked::before {
 }
 #dom_contentarea.viewOodo .viewReportOodo {
   display: block;
+  position: relative;
 }
 #dom_contentarea.viewOodo .dom_chart_total.circle.viewReportOodo {
   display: flex;
@@ -1799,6 +1800,9 @@ input[type="checkbox"]:checked::before {
   min-width: unset !important;
 }
 @media (max-width: 768px) {
+  .logo_oodo {
+    width: 10rem;
+  }
   .dom_chart_item.circle.leadchart {
     width: 100%;
   }
