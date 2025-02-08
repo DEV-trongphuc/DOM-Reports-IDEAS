@@ -3207,14 +3207,18 @@ dom_highest_switch_btn.forEach((item, index) => {
 
 // 🟢 Gọi hàm với adset_id và access_token của bạn
 // getAdPostFromAdSet("120215999275420636");
-
-
 const saleteam = [
   "Lưu Phan Hoàng Phúc",
   "Nguyễn Thị Linh Đan",
   "Lê Đinh Ý Nhi",
   "Mai Thị Nữ",
 ];
+const saleAvatar = {
+  "Lưu Phan Hoàng Phúc": "./DOM-img/phuc.jpg",
+  "Nguyễn Thị Linh Đan": "./DOM-img/dan.jpg",
+  "Lê Đinh Ý Nhi": "./DOM-img/ynhi.jpg",
+  "Mai Thị Nữ": "./DOM-img/nu.jpg",
+};
 const tagName = {
   126: "Status - New",
   127: "Bad-timing",
@@ -3457,7 +3461,9 @@ function processAndRenderLeads(leads) {
       <td class="${formatTagName(getTagDisplay(lead.tag_ids))}">${getTagDisplay(
       lead.tag_ids
     )}</td>
-      <td>${saleperson}</td>
+      <td> <img src="${
+        saleAvatar[saleperson]
+      }"/> <span>${saleperson}</span></td>
       <td>${lead.description || ""}</td>
       <td>${lead.__last_update || ""}</td>
       <td>${getRound(
