@@ -22,3 +22,4 @@ const goalMapping = {
   ],
   Pagelike: ["PAGE_LIKES"],
 };
+let oodo_view = true;
