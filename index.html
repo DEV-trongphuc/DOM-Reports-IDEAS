@@ -31,7 +31,7 @@
       href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./dom_oodo.css" />
+    <link rel="stylesheet" href="./dom.css" />
   </head>
   <body>
     <div id="dom_sidebar">
@@ -90,7 +90,7 @@
         <i class="fa-regular fa-square-caret-right"></i>
       </div>
     </div>
-
+    <div id="dom_side_overlay"></div>
     <div id="dom_contentarea" class="">
       <div class="dom_header">
         <div class="dom_bar">
@@ -769,7 +769,9 @@
               placeholder='Filter by "Phone & Saleperson"'
               type="text"
             />
-            <p id="dom_detail_find">Export <i class="fa-solid fa-table"></i></p>
+            <p id="dom_detail_find" class="oodo">
+              Export <i class="fa-solid fa-table"></i>
+            </p>
           </div>
         </div>
         <div class="dom_table_container oodo">
@@ -847,6 +849,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
     <script src="./domvar.js"></script>
+    <script src="./dom.js"></script>
     <script src="./dom_oodo.js"></script>
   </body>
 </html>
