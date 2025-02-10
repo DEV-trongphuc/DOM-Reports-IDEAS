@@ -31,7 +31,7 @@
       href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./dom.css" />
+    <link rel="stylesheet" href="./dom_oodo.css" />
   </head>
   <body>
     <div id="dom_sidebar">
@@ -53,7 +53,7 @@
       <ul class="dom_main_menu">
         <li>
           <a class="active">
-            <i class="fa-solid fa-chart-column"></i> <span>Dashboard</span></a
+            <i class="fa-solid fa-chart-column"></i><span>Dashboard</span></a
           >
         </li>
         <li>
@@ -63,12 +63,12 @@
         </li>
         <li>
           <a class="">
-            <i class="fa-solid fa-chart-pie"></i> <span>Demographic</span></a
+            <i class="fa-solid fa-chart-pie"></i><span>Demographic</span></a
           >
         </li>
         <li>
           <a class="">
-            <i class="fa-solid fa-user-graduate"></i> <span>Leads Oodo</span></a
+            <i class="fa-solid fa-graduation-cap"></i><span>Oodo CRM</span></a
           >
         </li>
         <!-- <li>
@@ -761,12 +761,12 @@
 
       <div class="dom_table_data oodo viewReportOodo">
         <div class="dom_detail_head">
-          <h2>Detail Leads</h2>
+          <h2>Stage Won Detail</h2>
           <div>
             <input
               id="dom_detail_input"
               class="oodo"
-              placeholder='Filter by "Phone & Saleperson"'
+              placeholder='Filter by "Phone & Saleperson & Program Name"'
               type="text"
             />
             <p id="dom_detail_find" class="oodo">
@@ -779,14 +779,16 @@
             <table class="dom_detail_table" id="dom_table_oodo">
               <thead>
                 <tr>
+                  <th>Won Date</th>
                   <th>Create Date</th>
+                  <th>Opportunity</th>
                   <th>Name</th>
                   <th>Email</th>
                   <th>Phone</th>
-                  <th>Tag</th>
                   <th>Saleperson</th>
-                  <th>Description</th>
-                  <th>Last_update</th>
+                  <th>Amount</th>
+                  <th>Source</th>
+                  <th>Campaign</th>
                   <th>Medium</th>
                 </tr>
               </thead>
@@ -795,7 +797,16 @@
           </div>
         </div>
       </div>
-
+      <div class="dom_chart_total circle viewReportOodo">
+        <div class="dom_chart_item circle wonchart">
+          <h2>Stage Won Monthly</h2>
+          <canvas id="wonChart"></canvas>
+        </div>
+        <div class="dom_chart_item circle wonchart">
+          <h2>Program in Time Range</h2>
+          <canvas id="wonProgramChart"></canvas>
+        </div>
+      </div>
       <div class="loading">
         <span class="loader"></span>
       </div>
@@ -849,7 +860,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
     <script src="./domvar.js"></script>
-    <script src="./dom.js"></script>
+    <script src="./dom_gnr.js"></script>
     <script src="./dom_oodo.js"></script>
   </body>
 </html>
