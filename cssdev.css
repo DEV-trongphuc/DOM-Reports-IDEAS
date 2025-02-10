@@ -34,8 +34,8 @@ html {
 :root {
   --mainClr: #ffa900;
   --textClr: #303030;
-  --buttonFadeClr: #dcdcdc;
-  --fadeClr: #f1f1f1;
+  --buttonFadeClr: #ececec;
+  --fadeClr: #f5f5f5;
   --fadeText: #3e3e3e;
 }
 body {
@@ -237,7 +237,8 @@ body::-webkit-scrollbar-thumb:hover {
 #dom_contentarea.viewPerformance .dom_total,
 #dom_contentarea.viewDemographic .dom_chart_total,
 #dom_contentarea.viewDemographic .dom_total,
-#dom_contentarea .viewDemographic {
+#dom_contentarea .viewDemographic,
+#dom_contentarea.viewQuickAdset .viewReportOodo {
   display: none;
 }
 
@@ -738,6 +739,7 @@ body::-webkit-scrollbar-thumb:hover {
   font-weight: bold;
   display: none;
 }
+
 .dom_chart_most_title > span:last-child {
   padding: 0 1rem;
 }
@@ -1099,11 +1101,95 @@ input[type="checkbox"]:checked::before {
   background-color: var(--mainClr);
   border-radius: 9px;
 }
-.dom_detail_table tbody td:nth-child(4) {
+.dom_detail_table .dom_detail_tbody td:nth-child(4) {
   text-align: center;
   cursor: pointer;
   font-size: 2rem;
   color: var(--mainClr);
+}
+.dom_detail_table .dom_detail_tbody_oodo td:nth-child(1) {
+  text-align: center;
+}
+
+.dom_detail_table .dom_detail_tbody_oodo td:nth-child(6) {
+  width: 20rem;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.dom_detail_table .dom_detail_tbody_oodo td:nth-child(6) img {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50rem;
+}
+.dom_detail_table .dom_detail_tbody_oodo td:nth-child(5) {
+  text-align: left;
+  padding-left: 3rem;
+  position: relative;
+}
+.dom_detail_table .dom_detail_tbody_oodo td:nth-child(5)::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 1.2rem;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50rem;
+}
+.viewReportOodo {
+  display: none;
+}
+
+.reportOodo {
+  position: relative;
+}
+.reportOodo h2 {
+  padding-top: 0rem;
+  padding-bottom: 3rem;
+}
+.logo_oodo {
+  width: 13rem;
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+}
+.dom_detail_table .dom_detail_tbody_oodo td:nth-child(5).needed::after {
+  background-color: rgba(255, 99, 132, 1);
+}
+.dom_detail_table .dom_detail_tbody_oodo td:nth-child(5).bad_timing::after {
+  background-color: rgb(108, 0, 86);
+}
+.dom_detail_table .dom_detail_tbody_oodo td:nth-child(5).status_new::after {
+  background-color: rgb(255, 68, 0);
+}
+.dom_detail_table .dom_detail_tbody_oodo td:nth-child(5).junk::after {
+  background-color: rgb(0, 0, 0);
+}
+.dom_detail_table .dom_detail_tbody_oodo td:nth-child(5).unqualified::after {
+  background-color: rgb(229, 217, 0);
+}
+
+.leadChart {
+  width: 100%;
+}
+#leadChart {
+  height: 30rem !important;
+}
+.dom_chart_item.circle.leadchart {
+  width: calc(50% - 1rem);
+}
+
+.dom_detail_table .dom_detail_tbody_oodo td:nth-child(8) {
+  text-align: center;
+}
+.dom_detail_table .dom_detail_tbody_oodo td:nth-child(9) {
+  text-align: left;
+}
+.dom_detail_table .dom_detail_tbody_oodo td:nth-child(7) {
+  text-align: left;
+  width: 50vw;
 }
 #dom_contentarea.viewQuickAdset .dom_detail_table td:nth-child(4),
 #dom_contentarea.viewQuickAdset .dom_detail_table th:nth-child(4) {
@@ -1219,7 +1305,23 @@ input[type="checkbox"]:checked::before {
       10px 50px;
   }
 }
-
+.progess_label {
+  display: flex;
+  gap: 3rem;
+}
+.progess_label p {
+  position: relative;
+  padding-left: 1.5rem;
+}
+.progess_label p span {
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50rem;
+  top: 45%;
+  left: 0;
+  transform: translateY(-50%);
+}
 .progress-bar {
   display: flex;
   width: 100%;
@@ -1238,16 +1340,24 @@ input[type="checkbox"]:checked::before {
   font-size: 1.2rem;
   text-align: center;
 }
-.segment_legend {
+
+#progressBar {
+  display: flex;
+  width: 100%;
+  height: 20px;
+  border-radius: 10rem;
+  background-color: var(--fadeClr);
+  overflow: hidden;
+}
+.progess_label {
   margin-top: 2rem;
-  font-size: 1.2rem;
 }
-.segment_legend b {
+.progess_label b {
   font-weight: bold;
 }
-.segment p {
-  margin: 0;
-  font-weight: bold;
+.segment {
+  width: 20%;
+  background-color: var(--mainClr);
 }
 
 #download_data {
@@ -1648,6 +1758,9 @@ input[type="checkbox"]:checked::before {
 #dom_contentarea.viewQuickAdset .dom_table_data {
   display: block;
 }
+#dom_contentarea.viewQuickAdset .dom_table_data.viewReportOodo {
+  display: none;
+}
 #dom_contentarea.viewQuickAdset .dom_quick_close {
   display: inline-block;
 }
@@ -1676,8 +1789,49 @@ input[type="checkbox"]:checked::before {
   background-color: var(--mainClr);
   color: white;
 }
-
+.dom_chart_total.oodo.only .dom_chart_item {
+  width: 100% !important;
+}
+#dom_contentarea.viewOodo .dom_total {
+  display: none;
+}
+#dom_table_oodo thead tr th {
+  padding: 2rem 0;
+}
+#dom_contentarea.viewOodo .dom_table_data {
+  display: none;
+}
+#dom_contentarea.viewOodo .dom_chart_total {
+  display: none;
+}
+#dom_contentarea.viewOodo .viewReportOodo {
+  display: block;
+  position: relative;
+}
+#dom_contentarea.viewOodo .dom_chart_total.circle.viewReportOodo {
+  display: flex;
+}
+.dom_chart_item.list ul.oodo {
+  max-height: unset;
+}
+.dom_detail_table .dom_detail_tbody_oodo td:nth-child(3) {
+  min-width: unset !important;
+}
 @media (max-width: 768px) {
+  .logo_oodo {
+    width: 10rem;
+  }
+  .dom_chart_item.circle.leadchart {
+    width: 100%;
+  }
+
+  #leadChart {
+    height: 20rem !important;
+  }
+  .progess_label {
+    gap: 1rem;
+    font-size: 1rem;
+  }
   .custom_date {
     left: -140%;
     width: max-content;
@@ -1706,6 +1860,9 @@ input[type="checkbox"]:checked::before {
   .dom_chart_total.viewPerformance.percentChart > .dom_chart_item.frequency {
     width: 100%;
     height: 30rem;
+  }
+  .dom_detail_table .dom_detail_tbody_oodo td:nth-child(7) {
+    width: 30rem;
   }
   .dom_chart_total.dailyChart_Account .dom_chart_item {
     width: 100%;
@@ -1802,24 +1959,23 @@ input[type="checkbox"]:checked::before {
     overflow-y: auto;
     overflow-x: hidden;
   }
-  #dom_sidebar::before {
-    content: "";
-    position: absolute;
-    width: 500vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.125);
-    top: 0;
-    opacity: 0;
-    z-index: -1;
-    left: 100%;
-    pointer-events: none;
-  }
-  #dom_sidebar.active::before {
-    opacity: 1;
-    pointer-events: all;
-  }
+
   #dom_sidebar.active {
     left: 0%;
+  }
+  #dom_side_overlay {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.25);
+    z-index: 99998;
+    opacity: 0;
+    transition: 0.3s;
+    pointer-events: none;
+  }
+  #dom_sidebar.active ~ #dom_side_overlay {
+    opacity: 1;
+    pointer-events: all;
   }
   #dom_contentarea {
     margin-left: 0;
