@@ -447,21 +447,17 @@
             <ul class="dom_toplist oodo"></ul>
           </div>
         </div>
-        <div class="dom_block">
+        <div class="dom_block main_odoo">
           <div class="dom_block_item w100 oodo table">
             <div class="dom_table">
               <div class="dom_table_head">
                 <h2>Detail Won & TSSAC</h2>
-                <div>
-                  <input
-                    class="dom_search oodo"
-                    placeholder="Filter by phone, name, program, saleperson"
-                  />
-                  <p class="dom_export_main oodo">
-                    Export <i class="fa-solid fa-table"></i>
-                  </p>
+                <div class="dom_show_chartbtns main_odoo">
+                  <p class="active">Table</p>
+                  <p>Chart</p>
                 </div>
               </div>
+              <canvas id="wonbyProgramChart"></canvas>
               <div class="dom_table_box">
                 <div class="dom_table_container">
                   <table id="won_table" class="table oodo">
@@ -495,7 +491,7 @@
             <div class="dom_table">
               <div class="dom_table_head">
                 <h2>Unpaid Invoice in this Month</h2>
-                <div class="dom_show_chartbtns">
+                <div class="dom_show_chartbtns invoice_table">
                   <p class="active">Table</p>
                   <p>Chart</p>
                 </div>
