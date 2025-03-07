@@ -457,6 +457,28 @@
                   <p>Chart</p>
                 </div>
               </div>
+              <div class="dom_selected leadchart">
+                <span class="dom_selected_text">Students & Target</span>
+                <i class="fa-solid fa-angle-down"></i>
+                <ul class="dom_select_show leadchart">
+                
+                  <li data-view="Students & Target" class="active">
+                    <span class="radio_box"></span
+                    ><span>Students & Target</span>
+                  </li>
+                  <li data-view="Paid in time & Target">
+                    <span class="radio_box"></span
+                    ><span>Paid in time & Target</span>
+                  </li>
+
+                  <li data-view="Total Paid">
+                    <span class="radio_box"></span><span>Total Paid</span>
+                  </li>
+                  <li data-view="Expected Revenue">
+                    <span class="radio_box"></span><span>Expected Revenue</span>
+                  </li>
+                </ul>
+              </div>
               <canvas id="wonbyProgramChart"></canvas>
               <div class="dom_table_box">
                 <div class="dom_table_container">
@@ -490,7 +512,7 @@
           <div class="dom_block_item w100 oodo table">
             <div class="dom_table">
               <div class="dom_table_head">
-                <h2>Unpaid Invoice in this Month</h2>
+                <h2>Next Pay Invoice</h2>
                 <div class="dom_show_chartbtns invoice_table">
                   <p class="active">Table</p>
                   <p>Chart</p>
@@ -502,12 +524,13 @@
                   <table id="invoice_table" class="table invoice">
                     <thead>
                       <tr>
-                        <th>Next Invoice</th>
-                        <th>Program</th>
                         <th>Name</th>
+                        <th>Program</th>
+                        <th>Next Invoice</th>
                         <th>Next Pay</th>
-                        <th>Total Paid</th>
-                        <th>Revenue</th>
+                        <th>Debt (1)</th>
+                        <th>Total Paid (2)</th>
+                        <th>Revenue (1+2)</th>
                         <th>Saleperson</th>
                         <th>Source</th>
                         <th>Campaign</th>
@@ -558,13 +581,9 @@
           </div>
         </div>
         <div class="dom_block">
-          <div class="dom_block_item w50">
+          <div class="dom_block_item w100">
             <h2>Won by month</h2>
             <canvas id="wonChart"></canvas>
-          </div>
-          <div class="dom_block_item w50">
-            <h2>Won by program</h2>
-            <canvas id="wonProgramChart"></canvas>
           </div>
         </div>
       </div>
