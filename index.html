@@ -452,25 +452,28 @@
         </div>
         <div class="dom_block main_odoo">
           <div class="dom_block_item w100 oodo table">
-            <div class="dom_table">
+            <div class="dom_table target">
               <div class="dom_table_head">
                 <h2>Detail Won & TSSAC</h2>
-                <div class="dom_show_chartbtns main_odoo">
-                  <p class="active">Table</p>
-                  <p>Chart</p>
+                <div class="dow_oodo_btns">
+                  <div class="dom_show_chartbtns main_odoo">
+                    <p class="active">Table</p>
+                    <p>Chart</p>
+                  </div>
+                  <p id="ex_won_table">
+                    <i class="fa-solid fa-file-excel"></i>
+                  </p>
                 </div>
               </div>
               <div class="dom_selected leadchart">
-                <span class="dom_selected_text">Students & Target</span>
+                <span class="dom_selected_text">Students</span>
                 <i class="fa-solid fa-angle-down"></i>
                 <ul class="dom_select_show leadchart">
-                  <li data-view="Students & Target" class="active">
-                    <span class="radio_box"></span
-                    ><span>Students & Target</span>
+                  <li data-view="Students" class="active">
+                    <span class="radio_box"></span><span>Students</span>
                   </li>
-                  <li data-view="Paid in time & Target">
-                    <span class="radio_box"></span
-                    ><span>Paid in time & Target</span>
+                  <li data-view="Paid in time">
+                    <span class="radio_box"></span><span>Paid in time</span>
                   </li>
 
                   <li data-view="Total Paid">
@@ -515,9 +518,14 @@
             <div class="dom_table">
               <div class="dom_table_head">
                 <h2>Next Pay Invoice</h2>
-                <div class="dom_show_chartbtns invoice_table">
-                  <p class="active">Table</p>
-                  <p>Chart</p>
+                <div class="dow_oodo_btns">
+                  <div class="dom_show_chartbtns invoice_table">
+                    <p class="active">Table</p>
+                    <p>Chart</p>
+                  </div>
+                  <p id="ex_invoice_table">
+                    <i class="fa-solid fa-file-excel"></i>
+                  </p>
                 </div>
               </div>
               <canvas id="nextChart"></canvas>
