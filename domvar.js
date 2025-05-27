@@ -7,7 +7,7 @@ const quickFilter = [
   "Pagelike",
 ];
 const accessToken =
-  "EAAOahG2GiWkBO0I3BUCvPwNKHU2ofCo1tyefwZC84fWmr0RiuW6IZCpm9D6ZB1IiK4EUe78eZBVDqZCEXUM9v4vxHHEZBw63tkXTsGRIUzWNEqz6ya2ncydlaZC0mZAb4jd3dqNIlOP8okZA6mNk0FbrRU56ZCgQ8ZBlb1zqmY79V7phqn3La23oQAoJlofY8OeYxXVkvTY5lEwHG8vUBbu"; // Token của bạn
+  "EAAOahG2GiWkBOZBCDqccffl67c74Tmpjnha7ClZBvxnO9VKcLM4qnH422I9PhE25sOmROOs3hjynmu4tUSBdL6V5BZB1ET3IHAijOtwZAsJpuhZCSe7Vw2ZCA3qJo75EimqmBmThSczRgxN3cBkPafItCsiZA17MXd8ZBDjRGNfjRO8cKspFPtMJUaZCjkkUfO2Uzxrccwoia"; // Token của bạn
 
 let isBrand = false;
 const accName = "Viện IDEAS";
