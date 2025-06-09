@@ -33,6 +33,7 @@ let viewStartOodo = null;
 let viewEndOodo = null;
 let wonLeadsGlobal = [];
 let targetGlobal = [];
+let totalLeadCreate = 0
 const sale_switch = document.querySelectorAll(".sale_switch");
 const PROXY = "https://ideas.edu.vn/proxy.php";
 let loginPromise = loginOdoo(); // Gọi login ngay từ lúc vào trang
@@ -584,6 +585,7 @@ async function fetchLeads() {
 
   const data = await response.json();
   console.log("Danh sách lead từ Odoo:", data);
+  totalLeadCreate = data.result.length
   return data.result;
 }
 sale_switch.forEach((item, index) => {
@@ -1266,7 +1268,7 @@ function renderProgressBar(totalData) {
   progressBar.replaceChildren(); // Xóa nhanh hơn innerHTML = ""
   progressLabel.replaceChildren();
 
-  let total = Object.values(totalData).reduce((sum, num) => sum + num, 0);
+  let total = totalLeadCreate
   console.log(total);
   console.log(Object.values(totalData));
   
