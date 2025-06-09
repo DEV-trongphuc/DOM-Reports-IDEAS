@@ -1266,7 +1266,7 @@ function renderProgressBar(totalData) {
   progressBar.replaceChildren(); // Xóa nhanh hơn innerHTML = ""
   progressLabel.replaceChildren();
 
-  let total = Object.values(totalData).length
+  let total = totalData.length
   oodo_total.innerText = total;
 
   if (total === 0) return;
