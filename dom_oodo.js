@@ -19,6 +19,7 @@ const tagName = {
   129: "Qualified",
   154: "Unqualified",
   170: "Needed",
+  32: "Considering",
 };
 const tagWon = {
   96: "DBA",
@@ -33,7 +34,7 @@ let viewStartOodo = null;
 let viewEndOodo = null;
 let wonLeadsGlobal = [];
 let targetGlobal = [];
-let totalLeadCreate = 0
+let totalLeadCreate = 0;
 const sale_switch = document.querySelectorAll(".sale_switch");
 const PROXY = "https://ideas.edu.vn/proxy.php";
 let loginPromise = loginOdoo(); // Gọi login ngay từ lúc vào trang
@@ -585,7 +586,7 @@ async function fetchLeads() {
 
   const data = await response.json();
   console.log("Danh sách lead từ Odoo:", data);
-  totalLeadCreate = data.result.length
+  totalLeadCreate = data.result.length;
   return data.result;
 }
 sale_switch.forEach((item, index) => {
@@ -1247,7 +1248,7 @@ function processAndRenderLeads(leads) {
     if (Array.isArray(tag_ids)) {
       let tagSet = new Set(tag_ids); // Dùng Set để kiểm tra nhanh hơn
 
-      if (tagSet.has(129) || tagSet.has(170)) data.Needed++;
+      if (tagSet.has(32) || tagSet.has(129) || tagSet.has(170)) data.Needed++;
       else if (tagSet.has(126)) data["Status - New"]++;
       else if (tagSet.has(127)) data["Bad-Timing"]++;
       else if (tagSet.has(154)) data.Unqualified++;
@@ -1268,10 +1269,10 @@ function renderProgressBar(totalData) {
   progressBar.replaceChildren(); // Xóa nhanh hơn innerHTML = ""
   progressLabel.replaceChildren();
 
-  let total = totalLeadCreate
+  let total = totalLeadCreate;
   console.log(total);
   console.log(Object.values(totalData));
-  
+
   oodo_total.innerText = total;
 
   if (total === 0) return;
@@ -1456,7 +1457,7 @@ function formatTagName(tag) {
 function getTagDisplay(tags) {
   if (!tags || tags.length === 0) return ""; // Không có tag thì để trống
 
-  if (tags.includes(129) || tags.includes(170)) {
+  if (tags.includes(129) || tags.includes(170) || tags.includes(32)) {
     return "Needed"; // Nếu có 129 hoặc 170 thì luôn hiển thị "Needed"
   }
 
@@ -1476,7 +1477,7 @@ function getTagDisplayWon(tags) {
 }
 
 function getTagDisplayNeeded(tags) {
-  return tags.includes(129) || tags.includes(170) ? "Needed" : null;
+  return tags.includes(129) || tags.includes(170) || tags.includes(32) ? "Needed" : null;
 }
 
 function filterTable(searchValue) {
