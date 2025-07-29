@@ -563,6 +563,13 @@ function drawWonLeadsChart(monthlyWonCounts) {
 }
 async function fetchLeads() {
   document.querySelector(".loading").classList.add("active");
+
+  // Lấy domain gốc từ hàm checkDateTime
+  const domain = checkDateTime("normal");
+
+  // Thêm điều kiện salesteam (team_id)
+  domain[0].push(["team_id", "=", 23]); // 5 là ID của "Dự án MBA/EMBA IDEAS"
+
   const response = await fetch(PROXY, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -574,9 +581,9 @@ async function fetchLeads() {
         params: {
           model: "crm.lead",
           method: "search_read",
-          args: checkDateTime("normal"),
+          args: domain,
           kwargs: {
-            fields: ["tag_ids", "user_id"],
+            fields: ["tag_ids", "user_id", "team_id"],
             limit: 0,
           },
         },
@@ -589,6 +596,7 @@ async function fetchLeads() {
   totalLeadCreate = data.result.length;
   return data.result;
 }
+
 sale_switch.forEach((item, index) => {
   item.addEventListener("click", () => {
     renderUloodo(salesDataGlobal, saleteam[index]);
@@ -1241,6 +1249,7 @@ function processAndRenderLeads(leads) {
       "Bad-Timing": 0,
       Unqualified: 0,
       Junk: 0,
+      Other: 0,
     });
 
     data.total++;
@@ -1253,9 +1262,12 @@ function processAndRenderLeads(leads) {
       else if (tagSet.has(127)) data["Bad-Timing"]++;
       else if (tagSet.has(154)) data.Unqualified++;
       else if (tagSet.has(128)) data.Junk++;
+      else data.Other++;
     }
   });
   salesDataGlobal = salesData;
+  console.log("salesDataGlobal", salesDataGlobal);
+
   renderChart(salesData);
   renderUloodo(salesData, saleteam[0]);
   calculateTotalSalesData(salesData);
@@ -1477,7 +1489,9 @@ function getTagDisplayWon(tags) {
 }
 
 function getTagDisplayNeeded(tags) {
-  return tags.includes(129) || tags.includes(170) || tags.includes(32) ? "Needed" : null;
+  return tags.includes(129) || tags.includes(170) || tags.includes(32)
+    ? "Needed"
+    : null;
 }
 
 function filterTable(searchValue) {
