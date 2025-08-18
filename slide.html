@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI: Đòn Bẩy Tăng Trưởng Cho Doanh Nghiệp (Tất cả Slides)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Be Vietnam Pro", sans-serif;
+        /* THAY ĐỔI: Cho phép cuộn trang */
+        overflow: auto;
+        background-color: #f8fafc; /* bg-slate-50 */
+      }
+
+      /* THAY ĐỔI: Chỉnh sửa CSS của .slide để hiển thị tất cả */
+      .slide {
+        position: relative; /* Hiển thị các slide nối tiếp nhau */
+        width: 100%;
+        min-height: 100vh; /* Mỗi slide cao ít nhất bằng màn hình */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 4rem 2rem; /* Thêm khoảng đệm */
+        opacity: 1; /* Luôn luôn hiển thị */
+        border-bottom: 5px solid #e2e8f0; /* Thêm đường kẻ phân cách */
+      }
+
+      /* BỎ: Không cần class .active nữa */
+      /* .slide.active { ... } */
+
+      .slide-wrapper {
+        width: 100%;
+        height: 100%;
+        max-width: 1200px;
+        display: flex;
+        flex-direction: column;
+      }
+      .slide-header {
+        flex-shrink: 0;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e2e8f0; /* border-slate-200 */
+        margin-bottom: 2rem;
+      }
+      .slide-content {
+        flex-grow: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .content-inner {
+        width: 100%;
+      }
+
+      /* THAY ĐỔI: Ẩn các thành phần điều hướng */
+      .progress-bar,
+      .nav-button,
+      .slide-counter {
+        display: none;
+      }
+
+      .bg-gradient-tech {
+        background: linear-gradient(
+          135deg,
+          #1e3a8a 0%,
+          #3b82f6 50%,
+          #60a5fa 100%
+        );
+      }
+      .bg-gradient-dark {
+        background: linear-gradient(135deg, #111827 0%, #374151 100%);
+      }
+      .text-shadow-lg {
+        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+      }
+      /* Gemini API Modal Styles */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+      }
+      .modal-overlay.visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .modal-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 1rem;
+        width: 90%;
+        max-width: 600px;
+        transform: scale(0.95);
+        transition: transform 0.3s ease;
+        position: relative;
+      }
+      .modal-overlay.visible .modal-content {
+        transform: scale(1);
+      }
+      .gemini-button {
+        background: linear-gradient(45deg, #4f46e5, #a259ff);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 9999px;
+        font-weight: bold;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      }
+      .gemini-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+      }
+      .loader {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #4f46e5;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="slide bg-gradient-tech">
+      <div class="slide-content relative text-white text-center">
+        <h1
+          class="text-6xl md:text-8xl font-black uppercase tracking-wider text-shadow-lg"
+        >
+          AI: Đòn Bẩy Tăng Trưởng
+        </h1>
+        <p class="mt-6 text-2xl md:text-3xl font-light text-shadow-lg">
+          Từ Công Cụ "Bỏ Túi" Đến Chiến Lược Chuyển Đổi Toàn Diện
+        </p>
+      </div>
+    </div>
+
+    <template id="master-slide">
+      <div class="slide-wrapper">
+        <header class="slide-header">
+          <h2 class="text-2xl font-bold text-slate-700"></h2>
+        </header>
+        <main class="slide-content">
+          <div class="content-inner"></div>
+        </main>
+      </div>
+    </template>
+
+    <div class="slide" data-title="Bối Cảnh Doanh Nghiệp Việt Nam">
+      <div class="grid md:grid-cols-2 gap-12 text-left">
+        <div
+          class="bg-white p-8 rounded-2xl shadow-lg flex flex-col border border-slate-200"
+        >
+          <h3 class="text-2xl font-bold text-red-600 mb-4">Thách Thức</h3>
+          <img
+            src="https://placehold.co/500x300/ef4444/ffffff?text=C%E1%BA%A1nh+tranh+%26+%C3%81p+l%E1%BB%B1c"
+            alt="Thách thức"
+            class="my-4 rounded-lg shadow-md w-full object-cover h-48"
+          />
+          <ul class="space-y-3 text-lg text-gray-700 list-disc list-inside">
+            <li>Cạnh tranh khốc liệt, nguồn lực có hạn</li>
+            <li>Áp lực "làm nhiều hơn với chi phí ít hơn"</li>
+            <li>Hành vi khách hàng thay đổi liên tục</li>
+          </ul>
+        </div>
+        <div
+          class="bg-white p-8 rounded-2xl shadow-lg flex flex-col border border-slate-200"
+        >
+          <h3 class="text-2xl font-bold text-green-600 mb-4">Cơ Hội</h3>
+          <img
+            src="https://placehold.co/500x300/22c55e/ffffff?text=T%C4%83ng+tr%C6%B0%E1%BB%9Fng+%26+%C4%90%E1%BB%95i+m%E1%BB%9Bi"
+            alt="Cơ hội"
+            class="my-4 rounded-lg shadow-md w-full object-cover h-48"
+          />
+          <ul class="space-y-3 text-lg text-gray-700 list-disc list-inside">
+            <li>Thị trường năng động, linh hoạt</li>
+            <li>Khả năng thích ứng và học hỏi nhanh</li>
+            <li>Thế hệ nhân sự mới am hiểu công nghệ</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide" data-title="Cơn Sóng AI: Những Con Số Biết Nói">
+      <div class="text-center">
+        <div class="grid md:grid-cols-3 gap-8">
+          <div
+            class="bg-blue-600 text-white p-8 rounded-2xl shadow-2xl transform hover:scale-105 transition-transform"
+          >
+            <p class="text-6xl font-black">$1,811 TỶ</p>
+            <p class="mt-2 text-lg">Quy mô thị trường AI toàn cầu (2030)</p>
+            <a
+              href="https://www.grandviewresearch.com/press-release/global-artificial-intelligence-ai-market"
+              target="_blank"
+              class="text-xs mt-2 inline-block opacity-70 hover:opacity-100"
+              >Nguồn: Grand View Research</a
+            >
+          </div>
+          <div
+            class="bg-indigo-600 text-white p-8 rounded-2xl shadow-2xl transform hover:scale-105 transition-transform"
+          >
+            <p class="text-6xl font-black">97 TRIỆU</p>
+            <p class="mt-2 text-lg">Việc làm mới có thể được tạo ra (2025)</p>
+            <a
+              href="https://www.weforum.org/press/2020/10/recession-and-automation-changes-our-future-of-work-but-there-are-jobs-coming-report-says-52c5162fce/"
+              target="_blank"
+              class="text-xs mt-2 inline-block opacity-70 hover:opacity-100"
+              >Nguồn: World Economic Forum</a
+            >
+          </div>
+          <div
+            class="bg-purple-600 text-white p-8 rounded-2xl shadow-2xl transform hover:scale-105 transition-transform"
+          >
+            <p class="text-6xl font-black">~80%</p>
+            <p class="mt-2 text-lg">
+              Lãnh đạo tin AI sẽ thay đổi cách tạo ra giá trị
+            </p>
+            <a
+              href="https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-state-of-ai-in-2023-generative-ais-breakout-year"
+              target="_blank"
+              class="text-xs mt-2 inline-block opacity-70 hover:opacity-100"
+              >Nguồn: McKinsey</a
+            >
+          </div>
+        </div>
+        <p class="mt-12 text-2xl font-semibold italic text-slate-700">
+          Câu hỏi không phải là "Liệu AI có tác động không?" mà là "Chúng ta sẽ
+          ở đâu khi cơn sóng này đi qua?"
+        </p>
+      </div>
+    </div>
+
+    <div class="slide" data-title="Hành Trình Hôm Nay">
+      <div class="text-center">
+        <div class="relative flex items-center justify-center w-full">
+          <div class="absolute w-full h-1 bg-gray-200"></div>
+          <div class="relative flex justify-between w-full max-w-4xl">
+            <div class="text-center w-1/3">
+              <div
+                class="bg-blue-500 text-white w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold mx-auto shadow-lg"
+              >
+                1
+              </div>
+              <h3 class="mt-4 text-xl font-bold">AI "Bỏ Túi"</h3>
+              <p class="text-gray-600">Công cụ tăng hiệu suất ngay lập tức</p>
+            </div>
+            <div class="text-center w-1/3">
+              <div
+                class="bg-indigo-500 text-white w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold mx-auto shadow-lg"
+              >
+                2
+              </div>
+              <h3 class="mt-4 text-xl font-bold">AI Chiến Lược</h3>
+              <p class="text-gray-600">Thúc đẩy chuyển đổi số toàn diện</p>
+            </div>
+            <div class="text-center w-1/3">
+              <div
+                class="bg-purple-500 text-white w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold mx-auto shadow-lg"
+              >
+                3
+              </div>
+              <h3 class="mt-4 text-xl font-bold">Lộ trình & Hành động</h3>
+              <p class="text-gray-600">Áp dụng cho doanh nghiệp của bạn</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide" data-title="Phần 1: AI 'Bỏ Túi' Cho Phòng Marketing">
+      <div
+        class="bg-white p-8 rounded-2xl shadow-xl w-full border border-slate-200 grid md:grid-cols-2 gap-8"
+      >
+        <div>
+          <h4 class="text-xl font-semibold text-red-600 mb-2">Nỗi đau:</h4>
+          <img
+            src="https://placehold.co/400x250/ef4444/ffffff?text=C%E1%BA%A1n+%C3%BD+t%C6%B0%E1%BB%9Fng"
+            alt="Cạn ý tưởng"
+            class="my-4 rounded-lg shadow-md w-full object-cover h-40"
+          />
+          <ul class="list-disc list-inside text-gray-700 space-y-1">
+            <li>Cạn ý tưởng, tốn thời gian viết content</li>
+            <li>Thiết kế hình ảnh chậm, không chuyên nghiệp</li>
+            <li>Tối ưu SEO phức tạp, khó đo lường</li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-xl font-semibold text-green-600 mb-2">
+            Giải pháp AI:
+          </h4>
+          <img
+            src="https://placehold.co/400x250/22c55e/ffffff?text=S%C3%A1ng+t%E1%BA%A1o+v%E1%BB%9Bi+AI"
+            alt="Sáng tạo với AI"
+            class="my-4 rounded-lg shadow-md w-full object-cover h-40"
+          />
+          <ul class="list-disc list-inside text-gray-700 space-y-1">
+            <li><b>Viết lách & Ý tưởng:</b> ChatGPT, Gemini</li>
+            <li><b>Thiết kế:</b> Canva AI, Microsoft Designer</li>
+            <li><b>Tối ưu SEO:</b> SurferSEO, Frase.io</li>
+          </ul>
+          <button id="openSloganModal" class="gemini-button mt-4">
+            ✨ Thử tạo Slogan với Gemini
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide" data-title="Phần 1: AI 'Bỏ Túi' Cho Phòng Kinh Doanh">
+      <div
+        class="bg-white p-8 rounded-2xl shadow-xl w-full border border-slate-200 grid md:grid-cols-2 gap-8"
+      >
+        <div>
+          <h4 class="text-xl font-semibold text-red-600 mb-2">Nỗi đau:</h4>
+          <img
+            src="https://placehold.co/400x250/ef4444/ffffff?text=Qu%C3%AAn+theo+d%C3%B5i"
+            alt="Quên theo dõi khách hàng"
+            class="my-4 rounded-lg shadow-md w-full object-cover h-40"
+          />
+          <ul class="list-disc list-inside text-gray-700 space-y-1">
+            <li>Soạn email lặp lại, quên follow-up</li>
+            <li>Tốn thời gian ghi chép sau mỗi cuộc gọi</li>
+            <li>Khó xác định khách hàng nào tiềm năng nhất</li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-xl font-semibold text-green-600 mb-2">
+            Giải pháp AI:
+          </h4>
+          <img
+            src="https://placehold.co/400x250/22c55e/ffffff?text=CRM+th%C3%B4ng+minh"
+            alt="CRM thông minh"
+            class="my-4 rounded-lg shadow-md w-full object-cover h-40"
+          />
+          <ul class="list-disc list-inside text-gray-700 space-y-1">
+            <li><b>CRM thông minh:</b> HubSpot AI, VTiger AI</li>
+            <li><b>Phân tích cuộc gọi:</b> Fireflies.ai, Otter.ai</li>
+            <li><b>Trợ lý Email:</b> Lavender, Reply.io</li>
+          </ul>
+          <button id="openEmailModal" class="gemini-button mt-4">
+            ✨ Thử viết Email với Gemini
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="slide"
+      data-title="Phần 1: AI 'Bỏ Túi' Cho Phòng Chăm Sóc Khách Hàng"
+    >
+      <div
+        class="bg-white p-8 rounded-2xl shadow-xl w-full border border-slate-200 grid md:grid-cols-2 gap-8"
+      >
+        <div>
+          <h4 class="text-xl font-semibold text-red-600 mb-2">Nỗi đau:</h4>
+          <img
+            src="https://placehold.co/400x250/ef4444/ffffff?text=Qu%C3%A1+t%E1%BA%A3i"
+            alt="Quá tải"
+            class="my-4 rounded-lg shadow-md w-full object-cover h-40"
+          />
+          <ul class="list-disc list-inside text-gray-700 space-y-1">
+            <li>Trả lời các câu hỏi lặp đi lặp lại</li>
+            <li>Quá tải vào giờ cao điểm, khách hàng phải chờ</li>
+            <li>Khó duy trì chất lượng hỗ trợ 24/7</li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-xl font-semibold text-green-600 mb-2">
+            Giải pháp AI:
+          </h4>
+          <img
+            src="https://placehold.co/400x250/22c55e/ffffff?text=Chatbot+24%2F7"
+            alt="Chatbot 24/7"
+            class="my-4 rounded-lg shadow-md w-full object-cover h-40"
+          />
+          <ul class="list-disc list-inside text-gray-700 space-y-1">
+            <li><b>Chatbot thông minh:</b> Mindmaid.ai, FPT.AI, AgentX,...</li>
+            <li><b>Nền tảng Live Chat:</b> Intercom, Zendesk AI, Tidio,...</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="slide"
+      data-title="Phần 1: AI 'Bỏ Túi' Cho Phòng Tài chính - Kế toán"
+    >
+      <div
+        class="bg-white p-8 rounded-2xl shadow-xl w-full border border-slate-200 grid md:grid-cols-2 gap-8"
+      >
+        <div>
+          <h4 class="text-xl font-semibold text-red-600 mb-2">Nỗi đau:</h4>
+          <img
+            src="https://placehold.co/400x250/ef4444/ffffff?text=H%C3%B3a+%C4%91%C6%A1n+gi%E1%BA%A5y"
+            alt="Hóa đơn giấy"
+            class="my-4 rounded-lg shadow-md w-full object-cover h-40"
+          />
+          <ul class="list-disc list-inside text-gray-700 space-y-1">
+            <li>Nhập liệu hóa đơn thủ công, dễ sai sót</li>
+            <li>Khó dự báo dòng tiền và phân tích chi phí</li>
+            <li>Tốn thời gian quản lý chi tiêu của nhân viên</li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-xl font-semibold text-green-600 mb-2">
+            Giải pháp AI:
+          </h4>
+          <img
+            src="https://placehold.co/400x250/22c55e/ffffff?text=X%E1%BB%AD+l%C3%BD+t%E1%BB%B1+%C4%91%E1%BB%99ng"
+            alt="Xử lý tự động"
+            class="my-4 rounded-lg shadow-md w-full object-cover h-40"
+          />
+          <ul class="list-disc list-inside text-gray-700 space-y-1">
+            <li><b>Xử lý hóa đơn (OCR):</b> Nanonets, MISA AMIS</li>
+            <li><b>Quản lý chi phí:</b> Expensify, Zoho Expense</li>
+            <li><b>Phân tích & Dự báo:</b> Microsoft Power BI</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide" data-title="Phần 1: AI 'Bỏ Túi' Cho Phòng Pháp chế">
+      <div
+        class="bg-white p-8 rounded-2xl shadow-xl w-full border border-slate-200 grid md:grid-cols-2 gap-8"
+      >
+        <div>
+          <h4 class="text-xl font-semibold text-red-600 mb-2">Nỗi đau:</h4>
+          <img
+            src="https://placehold.co/400x250/ef4444/ffffff?text=Ch%E1%BB%93ng+h%E1%BB%A3p+%C4%91%E1%BB%93ng"
+            alt="Chồng hợp đồng"
+            class="my-4 rounded-lg shadow-md w-full object-cover h-40"
+          />
+          <ul class="list-disc list-inside text-gray-700 space-y-1">
+            <li>Tốn thời gian tra cứu văn bản luật</li>
+            <li>Rà soát hợp đồng dài, dễ bỏ sót điểm rủi ro</li>
+            <li>Chi phí tư vấn luật sư bên ngoài cao</li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-xl font-semibold text-green-600 mb-2">
+            Giải pháp AI:
+          </h4>
+          <img
+            src="https://placehold.co/400x250/22c55e/ffffff?text=AI+r%C3%A0+so%C3%A1t+h%E1%BB%A3p+%C4%91%E1%BB%93ng"
+            alt="AI rà soát hợp đồng"
+            class="my-4 rounded-lg shadow-md w-full object-cover h-40"
+          />
+          <ul class="list-disc list-inside text-gray-700 space-y-1">
+            <li><b>Tra cứu & Tóm tắt:</b> Perplexity AI</li>
+            <li><b>Rà soát hợp đồng:</b> Luminance, LawGeex</li>
+            <li class="font-bold mt-2">
+              Lưu ý: AI chỉ là trợ lý, không thay thế luật sư.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide" data-title="Phần 1: AI 'Bỏ Túi' Cho IT & Nhân sự">
+      <div
+        class="bg-white p-8 rounded-2xl shadow-xl w-full border border-slate-200 grid md:grid-cols-2 gap-8"
+      >
+        <div>
+          <h4 class="text-xl font-semibold text-red-600 mb-2">Nỗi đau:</h4>
+          <img
+            src="https://placehold.co/400x250/ef4444/ffffff?text=Quy+tr%C3%ACnh+th%E1%BB%A7+c%C3%B4ng"
+            alt="Quy trình thủ công"
+            class="my-4 rounded-lg shadow-md w-full object-cover h-40"
+          />
+          <ul class="list-disc list-inside text-gray-700 space-y-1">
+            <li><b>IT:</b> Hỗ trợ người dùng các lỗi lặp đi lặp lại</li>
+            <li><b>Nhân sự:</b> Sàng lọc hồ sơ thủ công, tốn thời gian</li>
+            <li><b>Vận hành:</b> Các quy trình rời rạc, không kết nối</li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-xl font-semibold text-green-600 mb-2">
+            Giải pháp AI:
+          </h4>
+          <img
+            src="https://placehold.co/400x250/22c55e/ffffff?text=T%E1%BB%B1+%C4%91%E1%BB%99ng+h%C3%B3a"
+            alt="Tự động hóa"
+            class="my-4 rounded-lg shadow-md w-full object-cover h-40"
+          />
+          <ul class="list-disc list-inside text-gray-700 space-y-1">
+            <li><b>IT Helpdesk:</b> Power Virtual Agents</li>
+            <li><b>Sàng lọc hồ sơ (ATS):</b> AI trong TopCV, Monica AI,...</li>
+            <li><b>Tự động hóa quy trình:</b> Zapier, Make.com, N8N,...</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="slide"
+      data-title="Phần 2: AI Chiến Lược - Thúc Đẩy Chuyển Đổi Số"
+    >
+      <div class="text-center">
+        <div class="grid md:grid-cols-2 gap-8">
+          <div>
+            <h3 class="text-3xl font-bold text-gray-500 mb-4">Con Đường Cũ</h3>
+            <img
+              src="https://placehold.co/500x300/a16207/ffffff?text=G%E1%BB%93+Gh%E1%BB%81"
+              alt="Con đường cũ"
+              class="w-full rounded-lg shadow-lg mb-4 opacity-80"
+            />
+            <ul class="space-y-2 text-lg text-gray-600">
+              <li>Vận hành thủ công, chậm chạp</li>
+              <li>Ra quyết định theo cảm tính</li>
+              <li class="font-bold text-red-500 mt-2">
+                Hậu quả: Tụt hậu, mất thị phần
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="text-3xl font-bold text-blue-500 mb-4">Cao Tốc Số</h3>
+            <img
+              src="https://placehold.co/500x300/3b82f6/ffffff?text=Hi%E1%BB%87n+%C4%90%E1%BA%A1i"
+              alt="Cao tốc số"
+              class="w-full rounded-lg shadow-lg mb-4 shadow-blue-500/30"
+            />
+            <ul class="space-y-2 text-lg text-blue-600">
+              <li>Vận hành tự động, tốc độ</li>
+              <li>Ra quyết định dựa trên dữ liệu</li>
+              <li class="font-bold text-green-500 mt-2">
+                Kết quả: Bứt phá, dẫn đầu
+              </li>
+            </ul>
+          </div>
+        </div>
+        <p class="mt-12 text-2xl font-semibold italic text-slate-700">
+          Câu hỏi không phải là "CÓ NÊN LÀM HAY KHÔNG?".<br />Câu hỏi đúng là
+          "CHÚNG TA SẼ ĐI TRÊN CON ĐƯỜNG NÀO?"
+        </p>
+      </div>
+    </div>
+
+    <div class="slide" data-title="Case Study Chuyển Đổi Số">
+      <div
+        class="bg-white p-8 rounded-2xl shadow-lg grid md:grid-cols-2 gap-8 items-center border border-slate-200"
+      >
+        <div class="text-center">
+          <img
+            src="https://placehold.co/400x250/d12030/ffffff?text= DBS Digibank Online"
+            alt="Ngân hàng số"
+            class="rounded-lg shadow-md mx-auto"
+          />
+        </div>
+        <div>
+          <h3 class="text-2xl font-bold text-gray-800 mb-4">
+            Từ "Chậm như rùa" đến "Ngân hàng Tốt nhất Thế giới"
+          </h3>
+          <h4 class="text-xl font-semibold text-gray-700 mb-2">Hành động:</h4>
+          <ul class="list-disc list-inside text-lg space-y-2">
+            <li>Tầm nhìn CEO: "Hành động như một công ty công nghệ".</li>
+            <li>Chuyển 90% hệ thống lên Cloud.</li>
+            <li>Lấy Dữ liệu & AI làm trung tâm mọi quyết định.</li>
+          </ul>
+          <div class="mt-6 bg-green-100 p-4 rounded-lg">
+            <p class="text-green-800 font-bold text-lg">
+              <span class="font-extrabold">Kết quả:</span> Hiệu quả vượt trội,
+              liên tục được vinh danh.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide" data-title="Hành Trình Trên Cao Tốc Số & Vai Trò Của AI">
+      <div class="text-center">
+        <div class="grid md:grid-cols-3 gap-8 items-start">
+          <div class="text-center">
+            <h3 class="text-2xl font-bold mb-2">Trạm 1: Số hóa</h3>
+            <p class="text-gray-600 mb-4">(Vé lên cao tốc)</p>
+            <img
+              src="https://placehold.co/300x200/cccccc/000000?text=T%C3%A0i+li%E1%BB%87u"
+              alt="Số hóa"
+              class="rounded-lg mx-auto"
+            />
+            <p class="mt-2 text-lg">Chuyển dữ liệu từ giấy tờ sang dạng số.</p>
+          </div>
+          <div class="text-center">
+            <h3 class="text-2xl font-bold mb-2">Trạm 2: Ứng dụng số</h3>
+            <p class="text-gray-600 mb-4">(Nhấn ga)</p>
+            <img
+              src="https://placehold.co/300x200/60a5fa/ffffff?text=Ph%E1%BA%A7n+m%E1%BB%81m"
+              alt="Ứng dụng số"
+              class="rounded-lg mx-auto"
+            />
+            <p class="mt-2 text-lg">
+              Dùng công cụ số để tối ưu quy trình hiện có.
+            </p>
+          </div>
+          <div class="text-center">
+            <h3 class="text-2xl font-bold mb-2">Trạm 3: Chuyển đổi số</h3>
+            <p class="text-gray-600 mb-4">(Bật GPS thông minh)</p>
+            <img
+              src="https://placehold.co/300x200/8b5cf6/ffffff?text=M%C3%B4+h%C3%ACnh+m%E1%BB%9Bi"
+              alt="Chuyển đổi số"
+              class="rounded-lg mx-auto"
+            />
+            <p class="mt-2 text-lg">Tạo ra mô hình kinh doanh hoàn toàn mới.</p>
+          </div>
+        </div>
+        <p class="mt-8 text-2xl font-bold text-indigo-700">
+          Để đi hết hành trình này, bạn cần một
+          <span class="text-red-500">ĐỘNG CƠ PHẢN LỰC</span>. AI chính là động
+          cơ đó.
+        </p>
+      </div>
+    </div>
+
+    <div class="slide" data-title="Ứng Dụng Công Nghệ Để Phát Triển Bền Vững">
+      <div class="grid md:grid-cols-2 gap-8 items-center w-full">
+        <div class="flex justify-center items-center">
+          <div class="relative w-[450px] h-[300px] scale-90 md:scale-100">
+            <div
+              class="absolute top-0 left-1/2 -translate-x-1/2 bg-white p-4 rounded-full shadow-lg border-2 border-orange-400 w-64 h-24 flex items-center justify-center"
+            >
+              <div class="text-center">
+                <p class="font-bold text-gray-700">Tối ưu</p>
+                <p class="font-bold text-lg text-orange-500">hoá vận hành</p>
+              </div>
+              <div class="text-center ml-4">
+                <p class="font-bold text-gray-700">Đo lường</p>
+                <p class="font-bold text-lg text-orange-500">hiệu quả</p>
+              </div>
+            </div>
+
+            <div
+              class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-20 bg-orange-400 rounded-full flex items-center justify-center shadow-xl"
+            >
+              <h3 class="text-white text-3xl font-bold">CHUYỂN ĐỔI SỐ</h3>
+            </div>
+
+            <div
+              class="absolute top-1/2 -translate-y-1/2 left-0 w-24 h-16 bg-red-100 rounded-lg flex items-center justify-center text-red-700 font-semibold shadow-md"
+            >
+              Chiến lược
+            </div>
+
+            <div
+              class="absolute bottom-0 left-8 w-24 h-16 bg-blue-100 rounded-lg flex items-center justify-center text-blue-700 font-semibold shadow-md"
+            >
+              Dữ liệu
+            </div>
+            <div
+              class="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-16 bg-green-100 rounded-lg flex items-center justify-center text-green-700 font-semibold shadow-md"
+            >
+              Con người
+            </div>
+            <div
+              class="absolute bottom-0 right-8 w-24 h-16 bg-purple-100 rounded-lg flex items-center justify-center text-purple-700 font-semibold shadow-md"
+            >
+              Công nghệ
+            </div>
+          </div>
+        </div>
+        <div>
+          <ol
+            class="list-decimal list-inside space-y-3 text-base md:text-lg text-slate-700"
+          >
+            <li>
+              <span class="font-bold">Tăng trưởng doanh thu:</span> Ứng dụng
+              công nghệ vào phân phối hợp kênh (O2O): GT, MT, Horeca, E-Com,
+              Affiliate, KOLs,...
+            </li>
+            <li>
+              <span class="font-bold">Tăng trải nghiệm khách hàng:</span> Cá
+              nhân hoá hành trình mua hàng qua AI, CRM.
+            </li>
+            <li>
+              <span class="font-bold"
+                >Nâng cao năng lực quản trị và kiểm soát rủi ro:</span
+              >
+              Tối ưu hóa chuỗi cung ứng và quy trình vận hành, tự động hoá quy
+              trình bán hàng, kho vận, mua hàng,... để tiết giảm chi phí.
+            </li>
+            <li>
+              <span class="font-bold">Tối ưu nhân sự:</span> Giảm tải các công
+              việc thủ công và nâng cao hiệu suất đội ngũ.
+            </li>
+            <li>
+              <span class="font-bold"
+                >Phát triển năng lực nhân sự và văn hóa số:</span
+              >
+              Xây dựng hệ thống dữ liệu real-time, hỗ trợ phân tích và dự báo.
+            </li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="slide"
+      data-title="Nền Tảng Chiến Lược 1: Biến Dữ Liệu Thành 'Vàng'"
+    >
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <div class="text-center">
+          <img
+            src="https://placehold.co/400x400/f59e0b/ffffff?text=D%E1%BB%AE+LI%E1%BB%86U"
+            alt="Dữ liệu"
+            class="rounded-full shadow-2xl mx-auto"
+          />
+        </div>
+        <div>
+          <h2 class="text-3xl font-bold text-gray-800 mb-4">
+            Thay vì ra quyết định theo cảm tính, hãy để dữ liệu lên tiếng.
+          </h2>
+          <ul class="list-disc list-inside text-lg space-y-3 mt-6">
+            <li><b>Vấn đề:</b> Dữ liệu rời rạc, không được khai thác.</li>
+            <li>
+              <b>Giải pháp AI:</b> Business Intelligence (Power BI, Looker).
+            </li>
+            <li>
+              <b>Khả năng:</b> Dự báo doanh thu, trả lời câu hỏi bằng ngôn ngữ
+              tự nhiên, cảnh báo bất thường.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="slide"
+      data-title="Nền Tảng Chiến Lược 2: Tự Động Hóa Quy Trình Lõi"
+    >
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <div>
+          <h2 class="text-3xl font-bold text-gray-800 mb-4">
+            Giải phóng con người khỏi các công việc lặp lại để tập trung vào
+            sáng tạo.
+          </h2>
+          <ul class="list-disc list-inside text-lg space-y-3 mt-6">
+            <li>
+              <b>Vấn đề:</b> Các phòng ban hoạt động độc lập, quy trình thủ công
+              dễ sai sót.
+            </li>
+            <li>
+              <b>Giải pháp AI:</b> Kết nối các ứng dụng, tự động hóa chuỗi quy
+              trình.
+            </li>
+            <li>
+              <b>Ví dụ:</b> Khách đặt hàng -> AI tự động kiểm tra kho -> AI tạo
+              hóa đơn -> AI gửi lệnh cho kho -> Chatbot báo khách.
+            </li>
+          </ul>
+        </div>
+        <div class="text-center">
+          <img
+            src="https://placehold.co/400x400/4f46e5/ffffff?text=T%E1%BB%B0+%C4%90%E1%BB%98NG"
+            alt="Tự động hóa"
+            class="rounded-full shadow-2xl mx-auto"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="slide"
+      data-title="Nền Tảng Chiến Lược 3: Cá Nhân Hóa Trải Nghiệm"
+    >
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <div class="text-center">
+          <img
+            src="https://placehold.co/400x400/ec4899/ffffff?text=TR%E1%BA%A2I+NGHI%E1%BB%86M"
+            alt="Trải nghiệm khách hàng"
+            class="rounded-full shadow-2xl mx-auto"
+          />
+        </div>
+        <div>
+          <h2 class="text-3xl font-bold text-gray-800 mb-4">
+            Khiến mỗi khách hàng cảm thấy mình là duy nhất và được thấu hiểu.
+          </h2>
+          <ul class="list-disc list-inside text-lg space-y-3 mt-6">
+            <li>
+              <b>Vấn đề:</b> Mọi khách hàng đều nhận một thông điệp như nhau.
+            </li>
+            <li><b>Giải pháp AI:</b> Phân tích hành vi của từng khách hàng.</li>
+            <li>
+              <b>Ví dụ:</b> Gợi ý sản phẩm họ thực sự quan tâm (như Shopee,
+              Tiki), gửi email marketing với nội dung phù hợp.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide" data-title="Phần 3: Lộ Trình 4 Bước Để Bắt Đầu">
+      <div class="text-center">
+        <div class="grid md:grid-cols-4 gap-8">
+          <div class="text-center p-6 bg-white rounded-2xl shadow-md border">
+            <img
+              src="https://placehold.co/150x100/ef4444/ffffff?text=N%E1%BB%97i+%C4%91au&font-size=20"
+              alt="Nỗi đau"
+              class="mx-auto mb-4 rounded-lg"
+            />
+            <div
+              class="bg-red-500 text-white w-12 h-12 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4"
+            >
+              1
+            </div>
+            <h3 class="text-xl font-bold">Bắt đầu từ "Nỗi đau"</h3>
+            <p class="text-gray-600 mt-2">
+              Chọn vấn đề gây tốn thời gian, chi phí nhất.
+            </p>
+          </div>
+          <div class="text-center p-6 bg-white rounded-2xl shadow-md border">
+            <img
+              src="https://placehold.co/150x100/f59e0b/ffffff?text=Hi%E1%BB%87u+qu%E1%BA%A3+nhanh&font-size=24"
+              alt="Hiệu quả nhanh"
+              class="mx-auto mb-4 rounded-lg"
+            />
+            <div
+              class="bg-yellow-500 text-white w-12 h-12 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4"
+            >
+              2
+            </div>
+            <h3 class="text-xl font-bold">Tìm "Quả chín cây thấp"</h3>
+            <p class="text-gray-600 mt-2">
+              Chọn giải pháp AI dễ triển khai, hiệu quả thấy ngay.
+            </p>
+          </div>
+          <div class="text-center p-6 bg-white rounded-2xl shadow-md border">
+            <img
+              src="https://placehold.co/150x100/3b82f6/ffffff?text=V%C4%83n+h%C3%B3a&font-size=20"
+              alt="Văn hóa"
+              class="mx-auto mb-4 rounded-lg"
+            />
+            <div
+              class="bg-blue-500 text-white w-12 h-12 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4"
+            >
+              3
+            </div>
+            <h3 class="text-xl font-bold">Xây dựng Văn hóa</h3>
+            <p class="text-gray-600 mt-2">
+              Khuyến khích thử nghiệm & thu thập dữ liệu.
+            </p>
+          </div>
+          <div class="text-center p-6 bg-white rounded-2xl shadow-md border">
+            <img
+              src="https://placehold.co/150x100/22c55e/ffffff?text=%C4%90o+l%C6%B0%E1%BB%9Dng&font-size=20"
+              alt="Đo lường"
+              class="mx-auto mb-4 rounded-lg"
+            />
+            <div
+              class="bg-green-500 text-white w-12 h-12 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4"
+            >
+              4
+            </div>
+            <h3 class="text-xl font-bold">Đo lường & Mở rộng</h3>
+            <p class="text-gray-600 mt-2">
+              Đánh giá hiệu quả (ROI) và nhân rộng.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide" data-title="Vai Trò Của Con Người Trong Kỷ Nguyên AI">
+      <div class="text-center">
+        <div
+          class="bg-indigo-50 p-10 rounded-2xl shadow-lg border border-indigo-200"
+        >
+          <p class="text-3xl font-bold text-indigo-800 italic">
+            "AI sẽ không thay thế bạn, nhưng người biết dùng AI sẽ thay thế
+            người không biết dùng."
+          </p>
+        </div>
+        <div class="mt-8 grid md:grid-cols-2 gap-8 text-xl">
+          <div class="bg-white p-6 rounded-lg flex items-center gap-4 border">
+            <img
+              src="https://placehold.co/100x100/6366f1/ffffff?text=AI"
+              class="rounded-full"
+            />
+            <div>
+              <h3 class="font-bold mb-2">🤖 AI làm việc lặp lại</h3>
+              <p>Xử lý số liệu, tự động hóa, tìm kiếm thông tin.</p>
+            </div>
+          </div>
+          <div class="bg-white p-6 rounded-lg flex items-center gap-4 border">
+            <img
+              src="https://placehold.co/100x100/10b981/ffffff?text=NG%C6%AF%E1%BB%9CI"
+              class="rounded-full"
+            />
+            <div>
+              <h3 class="font-bold mb-2">
+                👩‍💼 Con người làm việc Sáng tạo & Cảm xúc
+              </h3>
+              <p>Xây dựng quan hệ, đàm phán, quyết định chiến lược.</p>
+            </div>
+          </div>
+        </div>
+        <button id="openLearningModal" class="gemini-button mt-8">
+          ✨ Gợi ý Lộ trình học AI cho nhân viên
+        </button>
+      </div>
+    </div>
+
+    <div class="slide bg-gradient-tech text-white">
+      <div class="text-center">
+        <h2 class="text-4xl font-bold mb-8 text-shadow-lg">
+          Thông Điệp Cuối Cùng
+        </h2>
+        <ul class="space-y-4 text-2xl font-light list-none text-shadow-lg">
+          <li>
+            <span class="font-bold text-yellow-300"
+              >AI không còn là lựa chọn,</span
+            >
+            mà là yêu cầu tất yếu.
+          </li>
+          <li>
+            <span class="font-bold text-yellow-300">Hãy bắt đầu nhỏ</span> để
+            giải quyết những "nỗi đau" lớn.
+          </li>
+          <li>
+            <span class="font-bold text-yellow-300">AI là con đường</span> dẫn
+            đến sự tự do cho người lãnh đạo.
+          </li>
+        </ul>
+        <p
+          class="mt-12 text-3xl font-black uppercase tracking-widest animate-pulse"
+        >
+          Hành Động Ngay Hôm Nay!
+        </p>
+      </div>
+    </div>
+
+    <div class="slide bg-gradient-dark text-white">
+      <div class="text-center">
+        <h2 class="text-8xl font-black">Q&A</h2>
+        <p class="mt-4 text-3xl">Hỏi & Đáp</p>
+      </div>
+    </div>
+
+    <div id="sloganModal" class="modal-overlay">
+      <div class="modal-content">
+        <h3 class="text-2xl font-bold mb-4">✨ Tạo Slogan với Gemini</h3>
+        <p class="text-gray-600 mb-4">
+          Nhập lĩnh vực kinh doanh của bạn để AI tạo slogan marketing.
+        </p>
+        <input
+          id="sloganProduct"
+          type="text"
+          placeholder="Ví dụ: cà phê hữu cơ, thời trang bền vững..."
+          class="w-full p-2 border border-gray-300 rounded-lg mb-4"
+        />
+        <button id="generateSlogan" class="gemini-button w-full">
+          Tạo Slogan
+        </button>
+        <div id="sloganLoader" class="hidden mx-auto mt-4 loader"></div>
+        <div
+          id="sloganResult"
+          class="mt-4 p-4 bg-gray-100 rounded-lg whitespace-pre-wrap"
+        ></div>
+        <button
+          class="close-modal absolute top-4 right-4 text-2xl text-gray-500"
+        >
+          &times;
+        </button>
+      </div>
+    </div>
+
+    <div id="emailModal" class="modal-overlay">
+      <div class="modal-content">
+        <h3 class="text-2xl font-bold mb-4">✨ Soạn Email với Gemini</h3>
+        <p class="text-gray-600 mb-4">
+          AI sẽ giúp bạn soạn một email theo dõi khách hàng chuyên nghiệp.
+        </p>
+        <input
+          id="emailCustomerName"
+          type="text"
+          placeholder="Tên khách hàng..."
+          class="w-full p-2 border border-gray-300 rounded-lg mb-2"
+        />
+        <input
+          id="emailTopic"
+          type="text"
+          placeholder="Chủ đề buổi họp..."
+          class="w-full p-2 border border-gray-300 rounded-lg mb-4"
+        />
+        <button id="generateEmail" class="gemini-button w-full">
+          Soạn Email
+        </button>
+        <div id="emailLoader" class="hidden mx-auto mt-4 loader"></div>
+        <div
+          id="emailResult"
+          class="mt-4 p-4 bg-gray-100 rounded-lg whitespace-pre-wrap"
+        ></div>
+        <button
+          class="close-modal absolute top-4 right-4 text-2xl text-gray-500"
+        >
+          &times;
+        </button>
+      </div>
+    </div>
+
+    <div id="learningModal" class="modal-overlay">
+      <div class="modal-content">
+        <h3 class="text-2xl font-bold mb-4">✨ Gợi ý Lộ trình học AI</h3>
+        <p class="text-gray-600 mb-4">
+          Nhấn nút để Gemini gợi ý một lộ trình học tập đơn giản cho nhân viên
+          muốn bắt đầu với AI.
+        </p>
+        <button id="generateLearning" class="gemini-button w-full">
+          Tạo Lộ trình
+        </button>
+        <div id="learningLoader" class="hidden mx-auto mt-4 loader"></div>
+        <div
+          id="learningResult"
+          class="mt-4 p-4 bg-gray-100 rounded-lg whitespace-pre-wrap"
+        ></div>
+        <button
+          class="close-modal absolute top-4 right-4 text-2xl text-gray-500"
+        >
+          &times;
+        </button>
+      </div>
+    </div>
+
+    <script>
+      const slides = document.querySelectorAll(".slide");
+      const masterSlideTemplate = document.getElementById("master-slide");
+
+      // Giữ lại phần code áp dụng layout chung cho các slide
+      slides.forEach((slide, index) => {
+        // Bỏ qua các slide có layout đặc biệt (đầu, cuối)
+        if (index === 0 || index >= slides.length - 2) {
+          return;
+        }
+
+        const title = slide.dataset.title;
+        if (title) {
+          const masterClone = masterSlideTemplate.content.cloneNode(true);
+          masterClone.querySelector(".slide-header h2").textContent = title;
+          const contentInner = masterClone.querySelector(".content-inner");
+
+          // Di chuyển nội dung gốc vào layout chung
+          while (slide.firstChild) {
+            contentInner.appendChild(slide.firstChild);
+          }
+
+          // Thêm cấu trúc mới vào slide
+          slide.appendChild(masterClone.querySelector(".slide-wrapper"));
+        }
+      });
+
+      // --- PHẦN JAVASCRIPT ĐIỀU KHIỂN SLIDESHOW ĐÃ BỊ LOẠI BỎ ---
+
+      // --- Gemini API Integration (GIỮ NGUYÊN) ---
+      const API_KEY = ""; // API Key sẽ được cung cấp tự động khi chạy
+
+      async function callGeminiAPI(
+        prompt,
+        loaderElement,
+        resultElement,
+        maxRetries = 3
+      ) {
+        loaderElement.style.display = "block";
+        resultElement.textContent = "";
+
+        let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+        const payload = { contents: chatHistory };
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`;
+
+        for (let i = 0; i < maxRetries; i++) {
+          try {
+            const response = await fetch(apiUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (
+              result.candidates &&
+              result.candidates.length > 0 &&
+              result.candidates[0].content &&
+              result.candidates[0].content.parts &&
+              result.candidates[0].content.parts.length > 0
+            ) {
+              const text = result.candidates[0].content.parts[0].text;
+              resultElement.textContent = text;
+            } else {
+              resultElement.textContent =
+                "Không nhận được phản hồi hợp lệ từ AI. Vui lòng thử lại.";
+            }
+
+            loaderElement.style.display = "none";
+            return; // Success, exit loop
+          } catch (error) {
+            console.error("Error calling Gemini API:", error);
+            if (i === maxRetries - 1) {
+              resultElement.textContent =
+                "Đã xảy ra lỗi khi kết nối với AI. Vui lòng kiểm tra lại sau.";
+              loaderElement.style.display = "none";
+            } else {
+              // Exponential backoff
+              await new Promise((resolve) =>
+                setTimeout(resolve, 1000 * Math.pow(2, i))
+              );
+            }
+          }
+        }
+      }
+
+      // Modal Handling (GIỮ NGUYÊN)
+      function setupModal(modalId, openBtnId) {
+        const modal = document.getElementById(modalId);
+        if (!modal || !openBtnId) return;
+        const openBtn = document.getElementById(openBtnId);
+        if (!openBtn) return;
+
+        const closeBtns = modal.querySelectorAll(".close-modal");
+
+        function openModal() {
+          modal.classList.add("visible");
+        }
+        function closeModal() {
+          modal.classList.remove("visible");
+        }
+
+        openBtn.addEventListener("click", openModal);
+        closeBtns.forEach((btn) => btn.addEventListener("click", closeModal));
+        modal.addEventListener("click", (e) => {
+          if (e.target === modal) closeModal();
+        });
+      }
+
+      setupModal("sloganModal", "openSloganModal");
+      setupModal("emailModal", "openEmailModal");
+      setupModal("learningModal", "openLearningModal");
+
+      // Slogan Generator (GIỮ NGUYÊN)
+      document
+        .getElementById("generateSlogan")
+        ?.addEventListener("click", () => {
+          const product = document.getElementById("sloganProduct").value;
+          if (!product) {
+            // Use a custom modal for alerts later if needed
+            console.log("Vui lòng nhập lĩnh vực kinh doanh.");
+            return;
+          }
+          const prompt = `Hãy tạo 5 slogan marketing độc đáo, sáng tạo và hấp dẫn cho một công ty kinh doanh về "${product}". Trình bày dưới dạng danh sách.`;
+          callGeminiAPI(
+            prompt,
+            document.getElementById("sloganLoader"),
+            document.getElementById("sloganResult")
+          );
+        });
+
+      // Email Generator (GIỮ NGUYÊN)
+      document
+        .getElementById("generateEmail")
+        ?.addEventListener("click", () => {
+          const customerName =
+            document.getElementById("emailCustomerName").value;
+          const topic = document.getElementById("emailTopic").value;
+          if (!customerName || !topic) {
+            console.log("Vui lòng nhập đủ thông tin.");
+            return;
+          }
+          const prompt = `Hãy viết một email theo dõi ngắn gọn, chuyên nghiệp nhưng thân thiện gửi cho khách hàng tiềm năng tên là "${customerName}" sau buổi họp về chủ đề "${topic}". Email cần thể hiện sự cảm ơn, tóm tắt lại điểm chính và đề xuất bước tiếp theo.`;
+          callGeminiAPI(
+            prompt,
+            document.getElementById("emailLoader"),
+            document.getElementById("emailResult")
+          );
+        });
+
+      // Learning Plan Generator (GIỮ NGUYÊN)
+      document
+        .getElementById("generateLearning")
+        ?.addEventListener("click", () => {
+          const prompt = `Hãy tạo một lộ trình học tập đơn giản gồm 3 bước, khả thi cho một nhân viên (ví dụ: phòng marketing, sales) muốn bắt đầu tìm hiểu và áp dụng AI vào công việc hàng ngày. Mỗi bước cần có mục tiêu rõ ràng và một vài gợi ý hành động cụ thể.`;
+          callGeminiAPI(
+            prompt,
+            document.getElementById("learningLoader"),
+            document.getElementById("learningResult")
+          );
+        });
+    </script>
+  </body>
+</html>
