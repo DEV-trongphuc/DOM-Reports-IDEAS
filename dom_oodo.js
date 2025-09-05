@@ -55,8 +55,8 @@ async function loginOdoo() {
         jsonrpc: "2.0",
         params: {
           db: "IBM_Prod",
-          login: "numt@ideas.edu.vn",
-          password: "1",
+          login: "thaing@ideas.edu.vn",
+          password: "Ideas@812",
         },
       },
     }),
